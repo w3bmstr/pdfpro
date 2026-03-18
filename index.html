@@ -1,0 +1,1149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>PDF Viewer + Ink Editor</title>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&family=Dancing+Script:wght@700&family=Pacifico&family=Sacramento&family=Caveat:wght@700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-deep:   #0f1117;
+      --bg-base:   #161b24;
+      --bg-raised: #1e2535;
+      --bg-hover:  #242c3d;
+      --border:    #2c3650;
+      --accent:    #4f8ef7;
+      --accent-dim:#2a4f9a;
+      --text:      #d6dff0;
+      --text-muted:#6b7a99;
+      --text-dim:  #3d4a65;
+      --danger:    #e05252;
+      --success:   #52c97a;
+      --highlight: rgba(79,142,247,0.18);
+      --font:      'IBM Plex Sans', sans-serif;
+      --mono:      'IBM Plex Mono', monospace;
+      --radius:    6px;
+    }
+    body.light-mode {
+      --bg-deep:   #e8eaed; --bg-base:   #ffffff; --bg-raised: #f5f6f8;
+      --bg-hover:  #edf0f5; --border:    #d1d9e6; --text:      #1a2030;
+      --text-muted:#5a6a80; --text-dim:  #a0b0c0; --highlight: rgba(79,142,247,0.12);
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: var(--font); font-size: 13px; background: var(--bg-deep); color: var(--text); display: flex; height: 100vh; overflow: hidden; }
+
+    /* ── SIDEBAR ─────────────────────────────────────────────── */
+    .sidebar { width: 52px; min-width: 52px; background: var(--bg-base); border-right: 1px solid var(--border); display: flex; flex-direction: column; align-items: center; padding: 6px 0; gap: 2px; z-index: 20; overflow: visible; }
+    .sidebar-sep { width: 32px; height: 1px; background: var(--border); margin: 4px 0; }
+    .nav-btn { position: relative; width: 36px; height: 36px; border: none; border-radius: var(--radius); background: transparent; color: var(--text-muted); cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 16px; transition: background .15s, color .15s; }
+    .nav-btn:hover { background: var(--bg-hover); color: var(--text); }
+    .nav-btn[aria-current="page"] { background: var(--highlight); color: var(--accent); }
+    .nav-btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+    .nav-btn::after { content: attr(data-tip); position: absolute; left: calc(100% + 10px); top: 50%; transform: translateY(-50%); background: #0a0d14; border: 1px solid var(--border); color: var(--text); padding: 4px 9px; border-radius: 4px; font-size: 11px; white-space: nowrap; pointer-events: none; opacity: 0; transition: opacity .12s; z-index: 100; }
+    .nav-btn:hover::after, .nav-btn:focus-visible::after { opacity: 1; }
+    #thumbs { width: 100%; overflow-y: auto; overflow-x: hidden; display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 6px 4px; flex: 1; scrollbar-width: thin; scrollbar-color: var(--border) transparent; }
+    #thumbs::-webkit-scrollbar { width: 4px; }
+    #thumbs::-webkit-scrollbar-thumb { background: var(--border); border-radius: 99px; }
+    .thumb { cursor: pointer; border-radius: 3px; border: 2px solid transparent; transition: border-color .12s; max-width: 44px; }
+    .thumb.active { border-color: var(--accent); }
+    .thumb:hover  { border-color: var(--accent-dim); }
+
+    /* ── MAIN ────────────────────────────────────────────────── */
+    .main { flex: 1; display: flex; flex-direction: column; overflow: hidden; min-width: 0; }
+    .topbar { min-height: 44px; background: var(--bg-base); border-bottom: 1px solid var(--border); display: flex; align-items: center; flex-wrap: wrap; padding: 4px 10px; gap: 4px; }
+    .topbar-title { font-size: 12px; font-weight: 600; color: var(--text-muted); letter-spacing: .08em; text-transform: uppercase; margin-right: 8px; white-space: nowrap; }
+    .top-divider { width: 1px; height: 22px; background: var(--border); margin: 0 6px; flex-shrink: 0; }
+    .topbar-spacer { flex: 1; }
+    .page-nav-bar { min-height: 40px; background: var(--bg-raised); border-bottom: 1px solid var(--border); display: flex; align-items: center; flex-wrap: wrap; padding: 4px 10px; gap: 4px; row-gap: 4px; }
+    .nav-group { display: flex; align-items: center; gap: 2px; }
+    .nav-sep { width: 1px; height: 20px; background: var(--border); margin: 0 6px; flex-shrink: 0; align-self: center; }
+    .nav-sep:first-child, .nav-sep:last-child { display: none; }
+    .page-indicator { display: flex; align-items: center; gap: 5px; font-size: 12px; color: var(--text-muted); font-family: var(--mono); }
+    #jump-page-input { width: 44px; background: var(--bg-deep); border: 1px solid var(--border); border-radius: 4px; color: var(--text); font-family: var(--mono); font-size: 12px; padding: 2px 6px; text-align: center; }
+    #jump-page-input:focus { outline: none; border-color: var(--accent); }
+    #zoom-indicator { font-family: var(--mono); font-size: 12px; color: var(--text-muted); min-width: 40px; text-align: center; }
+    .search-wrap { display: flex; align-items: center; gap: 4px; margin-left: auto; flex-shrink: 1; min-width: 0; }
+    #search-input { background: var(--bg-deep); border: 1px solid var(--border); border-radius: 4px; color: var(--text); font-size: 12px; padding: 3px 8px; width: clamp(80px,15vw,150px); min-width: 0; transition: border-color .15s; }
+    #search-input:focus { outline: none; border-color: var(--accent); }
+    #search-input::placeholder { color: var(--text-dim); }
+    #search-status { font-size: 11px; color: var(--text-dim); white-space: nowrap; }
+    .toolbar { min-height: 42px; background: var(--bg-base); border-bottom: 1px solid var(--border); display: flex; align-items: center; flex-wrap: wrap; padding: 5px 10px; gap: 3px; row-gap: 5px; }
+    .tool-label { font-size: 10px; color: var(--text-dim); text-transform: uppercase; letter-spacing: .08em; margin-right: 2px; white-space: nowrap; }
+
+    /* ── BUTTONS ─────────────────────────────────────────────── */
+    .tb-btn { height: 30px; padding: 0 10px; border: 1px solid transparent; border-radius: var(--radius); background: transparent; color: var(--text-muted); cursor: pointer; display: flex; align-items: center; gap: 5px; transition: background .12s, color .12s, border-color .12s; white-space: nowrap; font-family: var(--font); font-size: 12px; }
+    .tb-btn:hover { background: var(--bg-hover); color: var(--text); border-color: var(--border); }
+    .tb-btn.active, .tb-btn[aria-pressed="true"] { background: var(--highlight); color: var(--accent); border-color: var(--accent-dim); }
+    .tb-btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+    .tb-btn.icon-only { padding: 0; width: 30px; justify-content: center; font-size: 15px; }
+    .tb-btn.primary { background: var(--accent); color: #fff; border-color: var(--accent); }
+    .tb-btn.primary:hover { background: #3a7de8; }
+    .tb-btn.danger { background: var(--danger); color: #fff; border-color: var(--danger); }
+    .color-wrap { display: flex; align-items: center; gap: 5px; padding: 0 8px; height: 30px; border: 1px solid var(--border); border-radius: var(--radius); cursor: pointer; background: transparent; transition: border-color .12s; }
+    .color-wrap:hover { border-color: var(--accent); }
+    #color-picker { -webkit-appearance: none; width: 18px; height: 18px; border: none; border-radius: 50%; cursor: pointer; padding: 0; }
+    #color-picker::-webkit-color-swatch-wrapper { padding: 0; }
+    #color-picker::-webkit-color-swatch { border-radius: 50%; border: none; }
+    .size-wrap { display: flex; align-items: center; gap: 7px; padding: 0 8px; height: 30px; border: 1px solid var(--border); border-radius: var(--radius); }
+    #size-picker { -webkit-appearance: none; width: 80px; height: 4px; background: var(--border); border-radius: 99px; cursor: pointer; }
+    #size-picker::-webkit-slider-thumb { -webkit-appearance: none; width: 14px; height: 14px; border-radius: 50%; background: var(--accent); cursor: pointer; }
+
+    /* ── VIEWER ──────────────────────────────────────────────── */
+    .viewer { flex: 1; overflow: auto; background: var(--bg-deep); scrollbar-width: thin; scrollbar-color: var(--border) transparent; }
+    .viewer::-webkit-scrollbar { width: 8px; }
+    .viewer::-webkit-scrollbar-thumb { background: var(--border); border-radius: 99px; }
+    #pages-wrapper { display: flex; flex-direction: column; align-items: center; padding: 20px; gap: 20px; min-height: 100%; transform-origin: top center; }
+    .page-container { position: relative; background: white; box-shadow: 0 4px 24px rgba(0,0,0,.5); border-radius: 2px; flex-shrink: 0; }
+    canvas { display: block; }
+    .ink-layer { position: absolute; left: 0; top: 0; cursor: crosshair; }
+    .empty-state { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; min-height: 60vh; gap: 12px; opacity: .5; user-select: none; }
+    .empty-state .es-icon { font-size: 48px; }
+    .empty-state p { font-size: 14px; color: var(--text-muted); }
+    body.sig-place-active .ink-layer { cursor: none !important; pointer-events: none !important; }
+    body.sig-place-active .page-container { cursor: none; }
+
+    /* ── STATUSBAR ───────────────────────────────────────────── */
+    .statusbar { min-height: 28px; background: var(--bg-deep); border-top: 1px solid var(--border); display: flex; align-items: center; padding: 0 12px; gap: 16px; flex-wrap: wrap; font-family: var(--mono); font-size: 11px; color: var(--text-dim); }
+    .s-sep { width: 1px; height: 14px; background: var(--border); }
+
+    /* ── SIDE PANELS ─────────────────────────────────────────── */
+    .sidepanel { width: 220px; min-width: 180px; background: var(--bg-base); border-left: 1px solid var(--border); overflow-y: auto; padding: 12px; display: none; }
+    .sidepanel.active { display: block; }
+    .sidepanel h4 { font-size: 11px; text-transform: uppercase; letter-spacing: .1em; color: var(--text-dim); margin-bottom: 10px; padding-bottom: 8px; border-bottom: 1px solid var(--border); }
+    .sidepanel p { font-size: 12px; color: var(--text-muted); line-height: 1.6; }
+
+    /* ══════════════════════════════════════════════════════════
+       SIGNATURE MODAL
+    ══════════════════════════════════════════════════════════ */
+    .modal-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,.75); z-index: 1000; display: flex; align-items: center; justify-content: center; backdrop-filter: blur(8px); }
+    .modal-backdrop.hidden { display: none; }
+    .sig-modal { background: var(--bg-base); border: 1px solid var(--border); border-radius: 14px; width: 540px; max-width: 96vw; box-shadow: 0 28px 70px rgba(0,0,0,.65); display: flex; flex-direction: column; overflow: hidden; }
+
+    /* Header */
+    .sig-modal-header { display: flex; align-items: center; justify-content: space-between; padding: 15px 20px 14px; border-bottom: 1px solid var(--border); }
+    .sig-modal-header h3 { font-size: 14px; font-weight: 600; display: flex; align-items: center; gap: 7px; }
+    .sig-modal-header h3 em { font-style: normal; font-size: 11px; color: var(--text-muted); font-weight: 400; }
+
+    /* Tabs */
+    .sig-tabs { display: flex; gap: 2px; padding: 10px 20px 0; border-bottom: 1px solid var(--border); }
+    .sig-tab { padding: 8px 16px; font-size: 12px; color: var(--text-muted); cursor: pointer; border: none; background: none; font-family: var(--font); border-bottom: 2px solid transparent; margin-bottom: -1px; transition: color .12s, border-color .12s; border-radius: var(--radius) var(--radius) 0 0; }
+    .sig-tab:hover { color: var(--text); background: var(--bg-hover); }
+    .sig-tab.active { color: var(--accent); border-bottom-color: var(--accent); background: var(--highlight); }
+    .sig-tab-content { display: none; padding: 18px 20px 14px; }
+    .sig-tab-content.active { display: block; }
+
+    /* ── Draw tab ── */
+    .sig-canvas-wrap {
+      position: relative; background: #fff; border: 1.5px solid #dde3f0; border-radius: 8px;
+      overflow: hidden; cursor: crosshair; user-select: none;
+    }
+    .sig-canvas-wrap::before {
+      /* subtle baseline guide */
+      content: ''; position: absolute; bottom: 32px; left: 20px; right: 20px;
+      height: 1px; background: rgba(79,142,247,.25); pointer-events: none; z-index: 1;
+    }
+    #sig-draw-canvas { display: block; width: 100%; height: 180px; }
+    .sig-guide-label {
+      position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+      pointer-events: none; z-index: 2; transition: opacity .2s;
+    }
+    .sig-guide-label span { font-family: 'Dancing Script', cursive; font-size: 22px; color: #c8cfe0; }
+    .sig-guide-label.gone { opacity: 0; }
+    .sig-draw-tools { display: flex; align-items: center; gap: 8px; margin-top: 10px; flex-wrap: wrap; }
+    .sig-draw-tools .lbl { font-size: 11px; color: var(--text-muted); }
+
+    /* Color swatch in modal */
+    .modal-color { -webkit-appearance: none; width: 24px; height: 24px; border: none; border-radius: 50%; cursor: pointer; padding: 0; box-shadow: 0 0 0 2px var(--border); }
+    .modal-color::-webkit-color-swatch-wrapper { padding: 0; }
+    .modal-color::-webkit-color-swatch { border-radius: 50%; border: none; }
+
+    /* Undo mini-btn */
+    .sig-undo-btn { height: 26px; padding: 0 9px; font-size: 13px; }
+
+    /* ── Type tab ── */
+    .sig-type-input { width: 100%; background: var(--bg-raised); border: 1.5px solid var(--border); border-radius: var(--radius); color: var(--text); font-size: 22px; padding: 10px 14px; margin-bottom: 12px; font-family: var(--font); transition: border-color .15s; }
+    .sig-type-input:focus { outline: none; border-color: var(--accent); }
+    .sig-font-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 6px; margin-bottom: 12px; }
+    .sig-font-btn { padding: 8px 14px; border: 1.5px solid var(--border); border-radius: var(--radius); background: var(--bg-raised); color: var(--text-muted); cursor: pointer; font-size: 19px; transition: border-color .12s, color .12s, background .12s; text-align: center; }
+    .sig-font-btn:hover { border-color: var(--accent-dim); color: var(--text); }
+    .sig-font-btn.active { border-color: var(--accent); color: var(--accent); background: var(--highlight); }
+    .sig-preview-box { background: #fff; border: 1.5px solid #dde3f0; border-radius: 8px; height: 80px; display: flex; align-items: center; justify-content: center; overflow: hidden; }
+    #sig-type-preview-canvas { max-width: 100%; max-height: 80px; }
+
+    /* ── Upload tab ── */
+    .sig-upload-zone { border: 2px dashed var(--border); border-radius: var(--radius); padding: 28px; text-align: center; cursor: pointer; color: var(--text-muted); font-size: 13px; transition: border-color .12s, background .12s; }
+    .sig-upload-zone:hover, .sig-upload-zone.dragover { border-color: var(--accent); background: var(--highlight); color: var(--text); }
+    .sig-upload-zone .upload-icon { font-size: 26px; display: block; margin-bottom: 6px; }
+    .sig-upload-preview-box { display: none; background: repeating-conic-gradient(#ccc 0% 25%, #fff 0% 50%) 0 0 / 12px 12px; border: 1.5px solid #dde3f0; border-radius: 8px; margin-top: 10px; height: 80px; align-items: center; justify-content: center; overflow: hidden; }
+    .sig-upload-preview-box.show { display: flex; }
+    #sig-upload-preview-canvas { max-width: 100%; max-height: 80px; }
+
+    /* ── Saved signatures ── */
+    .sig-saved-section { padding: 10px 20px; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); background: var(--bg-raised); }
+    .sig-saved-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
+    .sig-saved-label { font-size: 10px; color: var(--text-dim); text-transform: uppercase; letter-spacing: .08em; }
+    .sig-saved-list { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 4px; scrollbar-width: thin; scrollbar-color: var(--border) transparent; min-height: 46px; align-items: center; }
+    .saved-sig-item { position: relative; flex-shrink: 0; }
+    .saved-sig-thumb { width: 80px; height: 38px; background: white; border: 2px solid var(--border); border-radius: 5px; cursor: pointer; object-fit: contain; display: block; transition: border-color .12s, box-shadow .12s; }
+    .saved-sig-thumb:hover { border-color: var(--accent); box-shadow: 0 0 0 3px var(--highlight); }
+    .saved-sig-del { position: absolute; top: -6px; right: -6px; width: 18px; height: 18px; background: var(--danger); border: 2px solid var(--bg-base); border-radius: 50%; color: #fff; font-size: 9px; cursor: pointer; display: none; align-items: center; justify-content: center; line-height: 1; z-index: 2; }
+    .saved-sig-item:hover .saved-sig-del { display: flex; }
+    .sig-saved-empty { font-size: 11px; color: var(--text-dim); }
+
+    /* Footer */
+    .sig-modal-footer { display: flex; align-items: center; justify-content: space-between; padding: 12px 20px; gap: 8px; }
+    .sig-footer-right { display: flex; align-items: center; gap: 8px; }
+
+    /* ══════════════════════════════════════════════════════════
+       PLACED SIGNATURE
+    ══════════════════════════════════════════════════════════ */
+    .placed-sig { position: absolute; cursor: move; border: 1.5px dashed transparent; border-radius: 3px; z-index: 10; transition: border-color .1s; }
+    .placed-sig:hover, .placed-sig.sel { border-color: var(--accent); }
+    .placed-sig img { width: 100%; height: 100%; object-fit: contain; display: block; pointer-events: none; user-select: none; }
+    .sig-ctrl-bar { position: absolute; top: -24px; right: 0; display: none; gap: 3px; }
+    .placed-sig:hover .sig-ctrl-bar, .placed-sig.sel .sig-ctrl-bar { display: flex; }
+    .sig-ctrl-btn { height: 20px; padding: 0 6px; font-size: 10px; border-radius: 4px; border: 1px solid transparent; background: var(--bg-base); color: var(--text-muted); cursor: pointer; display: flex; align-items: center; gap: 3px; white-space: nowrap; }
+    .sig-ctrl-btn:hover { background: var(--bg-hover); color: var(--text); }
+    .sig-ctrl-btn.del { background: var(--danger); color: #fff; border-color: var(--danger); }
+    .sig-resize-h { position: absolute; bottom: -6px; right: -6px; width: 14px; height: 14px; background: var(--accent); border: 2.5px solid #fff; border-radius: 3px; cursor: se-resize; display: none; box-shadow: 0 1px 4px rgba(0,0,0,.3); }
+    .placed-sig:hover .sig-resize-h, .placed-sig.sel .sig-resize-h { display: block; }
+
+    /* ── Ghost cursor when placing ── */
+    #sig-ghost { position: fixed; pointer-events: none; z-index: 9999; display: none; transform: translate(-50%, -50%); opacity: .7; max-width: 180px; max-height: 80px; object-fit: contain; filter: drop-shadow(0 2px 8px rgba(0,0,0,.4)); }
+    body.sig-place-active #sig-ghost { display: block; }
+
+    /* ── Place hint banner ── */
+    #sig-place-hint { position: fixed; bottom: 40px; left: 50%; transform: translateX(-50%); background: var(--accent); color: #fff; padding: 9px 22px; border-radius: 24px; font-size: 13px; z-index: 200; pointer-events: none; box-shadow: 0 4px 20px rgba(79,142,247,.5); display: none; white-space: nowrap; animation: hintIn .22s ease; }
+    @keyframes hintIn { from { opacity:0; transform: translateX(-50%) translateY(8px); } }
+
+    @media (max-width: 700px) {
+      .sidepanel { display: none !important; }
+      .topbar-title { display: none; }
+      #search-input { width: 80px; }
+      .nav-sep { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<nav class="sidebar" role="navigation" aria-label="Panel navigation">
+  <button class="nav-btn" id="nav-pages"       data-tip="Pages"       aria-label="Pages"       aria-current="page">📄</button>
+  <button class="nav-btn" id="nav-bookmarks"   data-tip="Bookmarks"   aria-label="Bookmarks">🔖</button>
+  <button class="nav-btn" id="nav-comments"    data-tip="Comments"    aria-label="Comments">💬</button>
+  <button class="nav-btn" id="nav-annotations" data-tip="Annotations" aria-label="Annotations">📝</button>
+  <button class="nav-btn" id="nav-layers"      data-tip="Layers"      aria-label="Layers">🗂️</button>
+  <div class="sidebar-sep"></div>
+  <div id="thumbs" role="list" aria-label="Page thumbnails"></div>
+</nav>
+
+<!-- MAIN -->
+<div class="main">
+
+  <!-- Row 1 -->
+  <div class="topbar" role="toolbar" aria-label="File operations">
+    <span class="topbar-title">PDF Editor</span>
+    <div class="top-divider"></div>
+    <input type="file" id="file-input" accept="application/pdf" style="display:none">
+    <button class="tb-btn" id="open-btn">📂 Open</button>
+    <button class="tb-btn" id="save-btn">💾 Save</button>
+    <button class="tb-btn" id="export-btn">⬇️ Export</button>
+    <div class="topbar-spacer"></div>
+    <div class="top-divider"></div>
+    <button class="tb-btn icon-only" id="dark-mode-btn" title="Toggle dark/light">🌙</button>
+    <button class="tb-btn icon-only" id="settings-btn"  title="Settings">⚙️</button>
+  </div>
+
+  <!-- Row 2 -->
+  <div class="page-nav-bar" role="toolbar" aria-label="Page navigation">
+    <div class="nav-group">
+      <button class="tb-btn icon-only" id="prev-page-btn" title="Previous page">◀</button>
+      <div class="page-indicator">
+        <input type="number" id="jump-page-input" min="1" value="1" aria-label="Page number">
+        <span>/ <span id="total-pages">—</span></span>
+      </div>
+      <button class="tb-btn icon-only" id="next-page-btn" title="Next page">▶</button>
+    </div>
+    <div class="nav-sep"></div>
+    <div class="nav-group">
+      <button class="tb-btn icon-only" id="zoom-out-btn" title="Zoom out (Ctrl -)">−</button>
+      <span id="zoom-indicator">100%</span>
+      <button class="tb-btn icon-only" id="zoom-in-btn"  title="Zoom in (Ctrl +)">+</button>
+    </div>
+    <div class="nav-sep"></div>
+    <div class="nav-group">
+      <button class="tb-btn icon-only" id="fit-width-btn" title="Fit to width">↔</button>
+      <button class="tb-btn icon-only" id="fit-page-btn"  title="Fit to page">⊡</button>
+      <button class="tb-btn icon-only" id="rotate-btn"    title="Rotate 90°">↻</button>
+    </div>
+    <div class="search-wrap">
+      <input type="text" id="search-input" placeholder="Search…" aria-label="Search">
+      <button class="tb-btn icon-only" id="search-btn" title="Search (Enter)">🔍</button>
+      <span id="search-status"></span>
+    </div>
+  </div>
+
+  <!-- Row 3 -->
+  <div class="toolbar" role="toolbar" aria-label="Annotation tools">
+    <span class="tool-label">Draw</span>
+    <button class="tb-btn active" id="pen-btn"       aria-pressed="true"  aria-label="Pen">✏️ Pen</button>
+    <button class="tb-btn"        id="highlight-btn" aria-pressed="false" aria-label="Highlight">🖍 Highlight</button>
+    <button class="tb-btn"        id="eraser-btn"    aria-pressed="false" aria-label="Erase">🧽 Erase</button>
+    <div class="nav-sep"></div>
+    <button class="tb-btn icon-only" id="undo-btn" title="Undo (Ctrl+Z)">↩</button>
+    <button class="tb-btn icon-only" id="redo-btn" title="Redo (Ctrl+Y)">↪</button>
+    <div class="nav-sep"></div>
+    <label class="color-wrap" title="Stroke color">
+      🎨 <input type="color" id="color-picker" value="#4f8ef7">
+    </label>
+    <label class="size-wrap" title="Brush size">
+      <span style="font-size:10px;color:var(--text-dim)">SIZE</span>
+      <input type="range" id="size-picker" min="1" max="20" value="3" aria-label="Brush size">
+    </label>
+    <div class="nav-sep"></div>
+    <button class="tb-btn primary" id="sign-btn" aria-pressed="false" aria-label="Signature">✍ Sign</button>
+  </div>
+
+  <div class="viewer" id="pdf-container">
+    <div id="pages-wrapper"></div>
+    <div class="empty-state" id="empty-state">
+      <span class="es-icon">📄</span>
+      <p>Open a PDF to get started</p>
+    </div>
+  </div>
+
+  <div class="statusbar" role="status" aria-live="polite">
+    <span id="status-page">Page: —</span>
+    <div class="s-sep"></div>
+    <span id="status-zoom">Zoom: 100%</span>
+    <div class="s-sep"></div>
+    <span id="status-file">No file open</span>
+    <div class="s-sep"></div>
+    <span id="status-size"></span>
+  </div>
+</div>
+
+<!-- SIDE PANELS -->
+<aside class="sidepanel" id="sidepanel-bookmarks"><h4>Bookmarks</h4><p>No bookmarks yet.</p></aside>
+<aside class="sidepanel" id="sidepanel-comments"><h4>Comments</h4><p>No comments yet.</p></aside>
+<aside class="sidepanel" id="sidepanel-annotations"><h4>Annotations</h4><p>No annotations yet.</p></aside>
+<aside class="sidepanel" id="sidepanel-layers"><h4>Layers</h4><p>No layers.</p></aside>
+
+<!-- ════ SIGNATURE MODAL ════ -->
+<div class="modal-backdrop hidden" id="sig-backdrop" role="dialog" aria-modal="true" aria-label="Signature creator">
+  <div class="sig-modal">
+
+    <div class="sig-modal-header">
+      <h3>✍ Create Signature <em>Draw, type, or upload — then place on the page</em></h3>
+      <button class="tb-btn icon-only" id="sig-close" aria-label="Close">✕</button>
+    </div>
+
+    <div class="sig-tabs">
+      <button class="sig-tab active" data-tab="draw">✏️ Draw</button>
+      <button class="sig-tab"        data-tab="type">T Type</button>
+      <button class="sig-tab"        data-tab="upload">⬆ Upload</button>
+    </div>
+
+    <!-- DRAW -->
+    <div class="sig-tab-content active" id="sig-tab-draw">
+      <div class="sig-canvas-wrap" id="sig-canvas-wrap">
+        <canvas id="sig-draw-canvas"></canvas>
+        <div class="sig-guide-label" id="sig-guide"><span>Sign here</span></div>
+      </div>
+      <div class="sig-draw-tools">
+        <span class="lbl">Ink</span>
+        <input type="color" class="modal-color" id="sig-ink-draw" value="#1c2130">
+        <span class="lbl" style="margin-left:8px">Size</span>
+        <input type="range" id="sig-pen-size" min="1" max="6" value="2" style="-webkit-appearance:none;width:70px;height:4px;background:var(--border);border-radius:99px;cursor:pointer">
+        <button class="tb-btn sig-undo-btn" id="sig-undo-draw" title="Undo last stroke (Ctrl+Z)">↩ Undo</button>
+        <button class="tb-btn sig-undo-btn" id="sig-clear-btn" style="margin-left:auto">Clear</button>
+      </div>
+    </div>
+
+    <!-- TYPE -->
+    <div class="sig-tab-content" id="sig-tab-type">
+      <input class="sig-type-input" id="sig-type-text" type="text" placeholder="Type your name…" autocomplete="name" spellcheck="false">
+      <div class="sig-font-grid" id="sig-font-grid"></div>
+      <div class="sig-preview-box">
+        <canvas id="sig-type-preview-canvas" width="480" height="80"></canvas>
+      </div>
+      <div class="sig-draw-tools" style="margin-top:10px">
+        <span class="lbl">Ink</span>
+        <input type="color" class="modal-color" id="sig-ink-type" value="#1c2130">
+      </div>
+    </div>
+
+    <!-- UPLOAD -->
+    <div class="sig-tab-content" id="sig-tab-upload">
+      <div class="sig-upload-zone" id="sig-upload-zone" tabindex="0" aria-label="Upload signature image">
+        <span class="upload-icon">🖼️</span>
+        Drop an image here, or <strong>click to browse</strong>
+        <br><span style="font-size:11px;color:var(--text-dim)">PNG with transparency looks best</span>
+        <input type="file" id="sig-upload-file" accept="image/*" style="display:none">
+      </div>
+      <div class="sig-upload-preview-box" id="sig-upload-preview-box">
+        <canvas id="sig-upload-preview-canvas" width="460" height="80"></canvas>
+      </div>
+    </div>
+
+    <!-- SAVED SIGNATURES -->
+    <div class="sig-saved-section">
+      <div class="sig-saved-header">
+        <span class="sig-saved-label">Saved signatures</span>
+        <span style="font-size:10px;color:var(--text-dim)">Hover to delete · click to reuse</span>
+      </div>
+      <div class="sig-saved-list" id="sig-saved-list">
+        <span class="sig-saved-empty">None yet — save a signature to reuse it.</span>
+      </div>
+    </div>
+
+    <!-- FOOTER -->
+    <div class="sig-modal-footer">
+      <button class="tb-btn" id="sig-cancel">Cancel</button>
+      <div class="sig-footer-right">
+        <button class="tb-btn" id="sig-save-btn">💾 Save for later</button>
+        <button class="tb-btn primary" id="sig-place-btn">Place on Document →</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- Ghost image that follows cursor during placement -->
+<img id="sig-ghost" src="" alt="">
+
+<!-- Placement hint -->
+<div id="sig-place-hint">Click anywhere on the document to place · Esc to cancel</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script src="https://unpkg.com/pdf-lib/dist/pdf-lib.min.js"></script>
+<script>
+'use strict';
+
+const SIG_FONTS = [
+  { label: 'Dancing Script', sample: 'Signature',    css: "'Dancing Script', cursive" },
+  { label: 'Sacramento',     sample: 'Signature',    css: "'Sacramento', cursive"     },
+  { label: 'Pacifico',       sample: 'Signature',    css: "'Pacifico', cursive"       },
+  { label: 'Caveat',         sample: 'Signature',    css: "'Caveat', cursive"         },
+];
+
+/* ── State ── */
+let pdfDoc = null, loadedPages = [], inkCanvases = [], pageContainers = [];
+let thumbCanvases = [], currentPageIdx = 0, history = [];
+let renderScale = 1.5, rotation = 0, zoomCss = 1.0, mode = 'pen';
+let placedSigs = [], savedSigs = [], pendingSigUrl = null;
+let selFont = SIG_FONTS[0], drawHasInk = false;
+let sigDrawHistory = [], sigDrawRedo = [];
+
+const $ = id => document.getElementById(id);
+
+/* ── Sidebar nav ── */
+const navItems = [
+  { btn: $('nav-pages'),       panel: null,                       thumb: true  },
+  { btn: $('nav-bookmarks'),   panel: $('sidepanel-bookmarks'),   thumb: false },
+  { btn: $('nav-comments'),    panel: $('sidepanel-comments'),    thumb: false },
+  { btn: $('nav-annotations'), panel: $('sidepanel-annotations'), thumb: false },
+  { btn: $('nav-layers'),      panel: $('sidepanel-layers'),      thumb: false },
+];
+function setActiveNav(idx) {
+  navItems.forEach(({ btn, panel }, i) => {
+    const a = i === idx;
+    btn?.setAttribute('aria-current', a ? 'page' : 'false');
+    panel?.classList.toggle('active', a);
+  });
+  $('thumbs').style.display = navItems[idx].thumb ? '' : 'none';
+}
+navItems.forEach(({ btn }, idx) => {
+  if (!btn) return;
+  btn.addEventListener('click', () => setActiveNav(idx));
+  btn.addEventListener('keydown', e => (e.key === 'Enter' || e.key === ' ') && setActiveNav(idx));
+});
+setActiveNav(0);
+
+/* ── Tool mode ── */
+const toolDefs = [
+  { id: 'pen-btn', m: 'pen' }, { id: 'highlight-btn', m: 'highlight' },
+  { id: 'eraser-btn', m: 'eraser' }, { id: 'sign-btn', m: 'sign' },
+];
+function setMode(m) {
+  if (m !== 'sigPlace') cancelSigPlace();
+  mode = m;
+  toolDefs.forEach(({ id, m: bm }) => {
+    const b = $(id); if (!b) return;
+    b.classList.toggle('active', bm === m);
+    b.setAttribute('aria-pressed', bm === m ? 'true' : 'false');
+  });
+}
+toolDefs.forEach(({ id, m }) => $(id)?.addEventListener('click', () => m === 'sign' ? openSigModal() : setMode(m)));
+setMode('pen');
+
+/* ── Dark mode ── */
+let lightMode = false;
+$('dark-mode-btn').addEventListener('click', () => {
+  lightMode = !lightMode;
+  document.body.classList.toggle('light-mode', lightMode);
+  $('dark-mode-btn').textContent = lightMode ? '🌞' : '🌙';
+});
+
+/* ══ FILE OPEN ══════════════════════════════════════════════════════════════ */
+$('open-btn').addEventListener('click', () => $('file-input').click());
+$('file-input').addEventListener('change', async e => {
+  const file = e.target.files[0]; if (!file) return;
+  $('empty-state')?.remove();
+  pdfDoc = await pdfjsLib.getDocument({ data: await file.arrayBuffer() }).promise;
+  loadedPages = [];
+  for (let i = 1; i <= pdfDoc.numPages; i++) loadedPages.push(await pdfDoc.getPage(i));
+  $('total-pages').textContent = pdfDoc.numPages;
+  $('status-file').textContent = file.name;
+  $('status-size').textContent = (file.size / 1024).toFixed(1) + ' KB';
+  history    = loadedPages.map(() => ({ u: [], r: [] }));
+  placedSigs = [];
+  await renderAll();
+  setActiveThumb(0); updatePageNum(1);
+  $('file-input').value = '';
+});
+
+/* ══ RENDER ═════════════════════════════════════════════════════════════════ */
+async function renderAll(snapshots = null) {
+  placedSigs.forEach(s => s.el?.remove());
+  $('pages-wrapper').innerHTML = ''; $('thumbs').innerHTML = '';
+  inkCanvases = []; pageContainers = []; thumbCanvases = [];
+
+  for (let i = 0; i < loadedPages.length; i++) {
+    const page = loadedPages[i];
+    const vp   = page.getViewport({ scale: renderScale, rotation });
+
+    const wrap = document.createElement('div');
+    wrap.className = 'page-container';
+    wrap.style.width = vp.width + 'px'; wrap.style.height = vp.height + 'px';
+    wrap.dataset.pageIndex = i;
+
+    const pdfC = document.createElement('canvas');
+    pdfC.width = vp.width; pdfC.height = vp.height;
+
+    const inkC = document.createElement('canvas');
+    inkC.className = 'ink-layer'; inkC.width = vp.width; inkC.height = vp.height;
+
+    wrap.appendChild(pdfC); wrap.appendChild(inkC);
+    $('pages-wrapper').appendChild(wrap);
+    pageContainers.push(wrap); inkCanvases.push(inkC);
+
+    await page.render({ canvasContext: pdfC.getContext('2d'), viewport: vp }).promise;
+    enableDrawing(inkC, i);
+    enablePageClick(wrap, i);
+    if (snapshots?.[i]) await loadUrl(inkC, snapshots[i]);
+
+    const tvp = page.getViewport({ scale: 0.22, rotation });
+    const tc  = document.createElement('canvas');
+    tc.width = tvp.width; tc.height = tvp.height;
+    tc.className = 'thumb'; tc.title = `Page ${i + 1}`;
+    tc.setAttribute('role', 'listitem');
+    await page.render({ canvasContext: tc.getContext('2d'), viewport: tvp }).promise;
+    $('thumbs').appendChild(tc); thumbCanvases.push(tc);
+    tc.addEventListener('click', () => scrollToPage(i));
+    pageObserver.observe(wrap);
+  }
+  placedSigs.forEach(s => attachSigEl(s));
+}
+
+function loadUrl(canvas, url) {
+  return new Promise(res => {
+    const img = new Image();
+    img.onload = () => { canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height); res(); };
+    img.src = url;
+  });
+}
+
+/* ══ ZOOM ═══════════════════════════════════════════════════════════════════ */
+function applyZoom(pct) {
+  zoomCss = Math.max(25, Math.min(400, Math.round(pct))) / 100;
+  $('pages-wrapper').style.zoom = zoomCss;
+  const d = Math.round(zoomCss * 100) + '%';
+  $('zoom-indicator').textContent = d;
+  $('status-zoom').textContent    = 'Zoom: ' + d;
+}
+$('zoom-in-btn').addEventListener('click',  () => applyZoom(zoomCss * 100 + 10));
+$('zoom-out-btn').addEventListener('click', () => applyZoom(zoomCss * 100 - 10));
+$('fit-width-btn').addEventListener('click', () => {
+  if (!pageContainers.length) return;
+  applyZoom(($('pdf-container').clientWidth - 40) / pageContainers[currentPageIdx].offsetWidth * 100);
+});
+$('fit-page-btn').addEventListener('click', () => {
+  if (!pageContainers.length) return;
+  const pw = pageContainers[currentPageIdx].offsetWidth;
+  const ph = pageContainers[currentPageIdx].offsetHeight;
+  applyZoom(Math.min(($('pdf-container').clientWidth - 40) / pw, ($('pdf-container').clientHeight - 40) / ph) * 100);
+});
+
+/* ══ ROTATION ═══════════════════════════════════════════════════════════════ */
+$('rotate-btn').addEventListener('click', async () => {
+  if (!pdfDoc) return;
+  const snaps = inkCanvases.map(c => c.toDataURL());
+  rotation = (rotation + 90) % 360;
+  await renderAll(snaps);
+});
+
+/* ══ PAGE NAV ═══════════════════════════════════════════════════════════════ */
+const pageObserver = new IntersectionObserver(entries => {
+  const top = entries.filter(e => e.isIntersecting).sort((a, b) => b.intersectionRatio - a.intersectionRatio)[0];
+  if (top) { const i = +top.target.dataset.pageIndex; if (!isNaN(i)) { setActiveThumb(i); updatePageNum(i + 1); } }
+}, { root: $('pdf-container'), threshold: 0.4 });
+
+function setActiveThumb(idx) { thumbCanvases.forEach((t, i) => t.classList.toggle('active', i === idx)); currentPageIdx = idx; }
+function scrollToPage(idx)   { pageContainers[idx]?.scrollIntoView({ behavior: 'smooth', block: 'start' }); setActiveThumb(idx); updatePageNum(idx + 1); }
+function updatePageNum(n)    { $('jump-page-input').value = n; $('status-page').textContent = `Page: ${n} / ${pdfDoc?.numPages ?? '—'}`; }
+
+$('prev-page-btn').addEventListener('click', () => { if (currentPageIdx > 0) scrollToPage(currentPageIdx - 1); });
+$('next-page-btn').addEventListener('click', () => { if (pdfDoc && currentPageIdx < pdfDoc.numPages - 1) scrollToPage(currentPageIdx + 1); });
+$('jump-page-input').addEventListener('change', e => {
+  const p = +e.target.value - 1;
+  if (pdfDoc && p >= 0 && p < pdfDoc.numPages) scrollToPage(p);
+});
+
+/* ══ SEARCH ═════════════════════════════════════════════════════════════════ */
+let searchMatches = [], searchIdx = -1;
+async function doSearch(q) {
+  if (!pdfDoc || !q.trim()) return;
+  searchMatches = []; searchIdx = -1;
+  const lq = q.toLowerCase();
+  for (let i = 0; i < loadedPages.length; i++) {
+    const c = await loadedPages[i].getTextContent();
+    if (c.items.map(it => it.str).join(' ').toLowerCase().includes(lq)) searchMatches.push(i);
+  }
+  if (!searchMatches.length) { $('search-status').textContent = 'Not found'; return; }
+  searchIdx = 0; scrollToPage(searchMatches[0]);
+  $('search-status').textContent = `1 / ${searchMatches.length}`;
+}
+function stepSearch(dir) {
+  if (!searchMatches.length) return;
+  searchIdx = (searchIdx + dir + searchMatches.length) % searchMatches.length;
+  scrollToPage(searchMatches[searchIdx]);
+  $('search-status').textContent = `${searchIdx + 1} / ${searchMatches.length}`;
+}
+$('search-btn').addEventListener('click', () => doSearch($('search-input').value));
+$('search-input').addEventListener('keydown', e => { if (e.key === 'Enter') e.shiftKey ? stepSearch(-1) : doSearch(e.target.value); });
+
+/* ══ DRAWING (ink) ══════════════════════════════════════════════════════════ */
+function canvasPos(e, canvas) {
+  const r = canvas.getBoundingClientRect(), s = e.touches?.[0] ?? e;
+  return { x: (s.clientX - r.left) * (canvas.width / r.width), y: (s.clientY - r.top) * (canvas.height / r.height) };
+}
+function enableDrawing(canvas, pi) {
+  const ctx = canvas.getContext('2d');
+  ctx.lineCap = ctx.lineJoin = 'round';
+  let drawing = false;
+  function start(e) {
+    if (!['pen','highlight','eraser'].includes(mode)) return;
+    e.preventDefault(); drawing = true;
+    history[pi].u.push(canvas.toDataURL()); history[pi].r = [];
+    ctx.beginPath(); const p = canvasPos(e, canvas); ctx.moveTo(p.x, p.y);
+  }
+  function move(e) {
+    if (!drawing) return; e.preventDefault();
+    ctx.globalAlpha = 1; ctx.globalCompositeOperation = 'source-over';
+    if (mode === 'pen')       { ctx.strokeStyle = $('color-picker').value; ctx.lineWidth = +$('size-picker').value; }
+    else if (mode === 'highlight') { ctx.globalAlpha = 0.35; ctx.strokeStyle = $('color-picker').value; ctx.lineWidth = $('size-picker').value * 4; }
+    else if (mode === 'eraser')    { ctx.globalCompositeOperation = 'destination-out'; ctx.lineWidth = $('size-picker').value * 3; }
+    const p = canvasPos(e, canvas);
+    ctx.lineTo(p.x, p.y); ctx.stroke(); ctx.beginPath(); ctx.moveTo(p.x, p.y);
+  }
+  function end() { if (!drawing) return; drawing = false; ctx.beginPath(); }
+  canvas.addEventListener('mousedown',   start);
+  canvas.addEventListener('mousemove',   move);
+  canvas.addEventListener('mouseup',     end);
+  canvas.addEventListener('mouseleave',  end);
+  canvas.addEventListener('touchstart',  start, { passive: false });
+  canvas.addEventListener('touchmove',   move,  { passive: false });
+  canvas.addEventListener('touchend',    end,   { passive: false });
+  canvas.addEventListener('touchcancel', end,   { passive: false });
+}
+
+/* ══ UNDO / REDO (ink) ══════════════════════════════════════════════════════ */
+function restoreCanvas(canvas, url) {
+  return new Promise(res => {
+    const img = new Image();
+    img.onload = () => { const c = canvas.getContext('2d'); c.clearRect(0, 0, canvas.width, canvas.height); c.drawImage(img, 0, 0); res(); };
+    img.src = url;
+  });
+}
+$('undo-btn').addEventListener('click', () => {
+  const h = history[currentPageIdx], c = inkCanvases[currentPageIdx];
+  if (!h?.u.length) return; h.r.push(c.toDataURL()); restoreCanvas(c, h.u.pop());
+});
+$('redo-btn').addEventListener('click', () => {
+  const h = history[currentPageIdx], c = inkCanvases[currentPageIdx];
+  if (!h?.r.length) return; h.u.push(c.toDataURL()); restoreCanvas(c, h.r.pop());
+});
+
+/* ══ SAVE / EXPORT ══════════════════════════════════════════════════════════ */
+async function saveAsPDF() {
+  if (!pdfDoc) {
+    alert('No PDF loaded. Please open a PDF before saving.');
+    return;
+  }
+  try {
+    // composite ink + placed sigs onto temp canvases
+    const comps = [];
+    const pageCount = pdfDoc ? pdfDoc.numPages : 0;
+    for (let i = 0; i < pageCount; i++) {
+      let c = inkCanvases[i];
+      if (!c) {
+        // Create a blank canvas matching the first canvas size or default size
+        const ref = inkCanvases[0];
+        c = document.createElement('canvas');
+        c.width = ref ? ref.width : 800;
+        c.height = ref ? ref.height : 1200;
+      }
+      const t = document.createElement('canvas'); t.width = c.width; t.height = c.height;
+      t.getContext('2d').drawImage(c, 0, 0); comps.push(t);
+    }
+    for (const s of placedSigs) {
+      // Skip if s.pi is invalid
+      if (typeof s.pi !== 'number' || s.pi < 0 || s.pi >= comps.length) continue;
+      await new Promise(res => {
+        const img = new Image();
+        img.onload = () => {
+          comps[s.pi].getContext('2d').drawImage(img,
+            s.l / 100 * comps[s.pi].width, s.t / 100 * comps[s.pi].height,
+            s.w / 100 * comps[s.pi].width, s.h / 100 * comps[s.pi].height);
+          res();
+        };
+        img.src = s.url;
+      });
+    }
+    const raw    = await pdfDoc.getData();
+    const libDoc = await PDFLib.PDFDocument.load(raw);
+    const pages  = libDoc.getPages();
+    for (let i = 0; i < pages.length; i++) {
+      if (!comps[i]) {
+        alert('Page ' + (i+1) + ' is missing its canvas and cannot be saved.');
+        continue;
+      }
+      const pngImg = await libDoc.embedPng(comps[i].toDataURL('image/png'));
+      const { width, height } = pages[i].getSize();
+      pages[i].drawImage(pngImg, { x: 0, y: 0, width, height });
+    }
+    const blob = new Blob([await libDoc.save()], { type: 'application/pdf' });
+    Object.assign(document.createElement('a'), { href: URL.createObjectURL(blob), download: 'edited.pdf' }).click();
+  } catch (err) {
+    alert('Failed to save PDF: ' + (err?.message || err));
+    console.error('Save PDF error:', err);
+  }
+}
+$('save-btn').addEventListener('click',   saveAsPDF);
+$('export-btn').addEventListener('click', saveAsPDF);
+
+/* ══════════════════════════════════════════════════════════════════════════
+   SIGNATURE MODAL
+══════════════════════════════════════════════════════════════════════════ */
+try { savedSigs = JSON.parse(localStorage.getItem('pdf_sigs') || '[]'); } catch { savedSigs = []; }
+function persistSigs() { try { localStorage.setItem('pdf_sigs', JSON.stringify(savedSigs.slice(0, 12))); } catch {} }
+
+function openSigModal() { $('sig-backdrop').classList.remove('hidden'); renderSavedSigs(); }
+function closeSigModal(){ $('sig-backdrop').classList.add('hidden'); }
+
+$('sig-close').addEventListener('click', closeSigModal);
+$('sig-cancel').addEventListener('click', closeSigModal);
+$('sig-backdrop').addEventListener('click', e => { if (e.target === $('sig-backdrop')) closeSigModal(); });
+
+// Tab switching
+document.querySelectorAll('.sig-tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    document.querySelectorAll('.sig-tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.sig-tab-content').forEach(c => c.classList.remove('active'));
+    tab.classList.add('active');
+    $('sig-tab-' + tab.dataset.tab).classList.add('active');
+    if (tab.dataset.tab === 'type') scheduleTypePreview();
+  });
+});
+
+/* ────────────────────────────────────────────────────────
+   DRAW TAB — high-res canvas with Bezier smoothing
+──────────────────────────────────────────────────────── */
+const DPR = window.devicePixelRatio || 1;
+const SIG_CANVAS_W = 480, SIG_CANVAS_H = 180;
+
+(function setupSigCanvas() {
+  const c = $('sig-draw-canvas');
+  c.width  = SIG_CANVAS_W * DPR;
+  c.height = SIG_CANVAS_H * DPR;
+  c.style.width  = SIG_CANVAS_W + 'px';
+  c.style.height = SIG_CANVAS_H + 'px';
+  const ctx = c.getContext('2d');
+  ctx.scale(DPR, DPR);
+  ctx.lineCap = ctx.lineJoin = 'round';
+})();
+
+const sigCtx = $('sig-draw-canvas').getContext('2d');
+let sigPainting = false;
+let sigPoints   = [];   // current stroke points
+let sigLastTime = 0;
+
+function sdPos(e) {
+  const c = $('sig-draw-canvas');
+  const r = c.getBoundingClientRect();
+  const s = e.touches?.[0] ?? e;
+  return {
+    x: (s.clientX - r.left),
+    y: (s.clientY - r.top),
+    t: Date.now()
+  };
+}
+
+function sigDrawStart(e) {
+  e.preventDefault();
+  sigPainting = true;
+  sigPoints = [];
+  sigDrawHistory.push($('sig-draw-canvas').toDataURL());
+  sigDrawRedo = [];
+  const p = sdPos(e);
+  sigPoints.push(p);
+  sigCtx.beginPath(); sigCtx.moveTo(p.x, p.y);
+}
+
+function sigDrawMove(e) {
+  if (!sigPainting) return; e.preventDefault();
+  const p = sdPos(e);
+  sigPoints.push(p);
+
+  // Speed-based pressure: faster = thinner, slower = thicker
+  const dt   = Math.max(1, p.t - (sigPoints[sigPoints.length - 2]?.t ?? p.t));
+  const dx   = p.x - (sigPoints[sigPoints.length - 2]?.x ?? p.x);
+  const dy   = p.y - (sigPoints[sigPoints.length - 2]?.y ?? p.y);
+  const speed = Math.sqrt(dx * dx + dy * dy) / dt;
+  const baseSize = +$('sig-pen-size').value;
+  const width = Math.max(0.5, baseSize * (1 - Math.min(speed * 0.5, 0.65)));
+
+  sigCtx.strokeStyle = $('sig-ink-draw').value;
+  sigCtx.lineWidth   = width;
+  sigCtx.globalAlpha = 1;
+  sigCtx.globalCompositeOperation = 'source-over';
+
+  // Bezier smoothing through midpoints
+  if (sigPoints.length >= 3) {
+    const len  = sigPoints.length;
+    const prev = sigPoints[len - 2];
+    const curr = sigPoints[len - 1];
+    const mid  = { x: (prev.x + curr.x) / 2, y: (prev.y + curr.y) / 2 };
+    sigCtx.quadraticCurveTo(prev.x, prev.y, mid.x, mid.y);
+  } else {
+    sigCtx.lineTo(p.x, p.y);
+  }
+  sigCtx.stroke();
+  sigCtx.beginPath();
+  sigCtx.moveTo(p.x, p.y);
+
+  drawHasInk = true;
+  $('sig-guide').classList.add('gone');
+}
+
+function sigDrawEnd() {
+  if (!sigPainting) return; sigPainting = false; sigCtx.beginPath();
+}
+
+const sigCanvas = $('sig-draw-canvas');
+sigCanvas.addEventListener('mousedown',   sigDrawStart);
+sigCanvas.addEventListener('mousemove',   sigDrawMove);
+sigCanvas.addEventListener('mouseup',     sigDrawEnd);
+sigCanvas.addEventListener('mouseleave',  sigDrawEnd);
+sigCanvas.addEventListener('touchstart',  sigDrawStart, { passive: false });
+sigCanvas.addEventListener('touchmove',   sigDrawMove,  { passive: false });
+sigCanvas.addEventListener('touchend',    sigDrawEnd);
+sigCanvas.addEventListener('touchcancel', sigDrawEnd);
+
+// Undo within sig canvas
+$('sig-undo-draw').addEventListener('click', () => {
+  if (!sigDrawHistory.length) return;
+  sigDrawRedo.push(sigCanvas.toDataURL());
+  const url = sigDrawHistory.pop();
+  loadUrl(sigCanvas, url).then(() => {
+    if (!sigDrawHistory.length) { drawHasInk = false; $('sig-guide').classList.remove('gone'); }
+  });
+});
+
+// Clear sig canvas
+$('sig-clear-btn').addEventListener('click', () => {
+  sigDrawHistory.push(sigCanvas.toDataURL()); sigDrawRedo = [];
+  sigCtx.clearRect(0, 0, SIG_CANVAS_W, SIG_CANVAS_H);
+  drawHasInk = false; $('sig-guide').classList.remove('gone');
+});
+
+/* ────────────────────────────────────────────────────────
+   TYPE TAB — wait for fonts, then render
+──────────────────────────────────────────────────────── */
+let fontsReady = false;
+document.fonts.ready.then(() => { fontsReady = true; scheduleTypePreview(); });
+
+function scheduleTypePreview() {
+  if (fontsReady) renderTypePreview();
+  else setTimeout(renderTypePreview, 600); // fallback if ready never fires
+}
+
+function buildFontBtns() {
+  const wrap = $('sig-font-grid');
+  SIG_FONTS.forEach((f, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'sig-font-btn' + (i === 0 ? ' active' : '');
+    btn.textContent = f.sample; btn.style.fontFamily = f.css; btn.title = f.label;
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.sig-font-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active'); selFont = f; renderTypePreview();
+    });
+    wrap.appendChild(btn);
+  });
+}
+buildFontBtns();
+
+function renderTypePreview() {
+  const text  = $('sig-type-text').value.trim() || 'Your Signature';
+  const color = $('sig-ink-type').value;
+  const c     = $('sig-type-preview-canvas');
+  const ctx   = c.getContext('2d');
+  ctx.clearRect(0, 0, c.width, c.height);
+  // measure and scale text to fit
+  ctx.font = `52px ${selFont.css}`;
+  const metrics = ctx.measureText(text);
+  const textW   = metrics.width;
+  const scale   = textW > c.width - 20 ? (c.width - 20) / textW : 1;
+  ctx.save();
+  ctx.translate(c.width / 2, c.height / 2);
+  ctx.scale(scale, scale);
+  ctx.font       = `52px ${selFont.css}`;
+  ctx.fillStyle  = color;
+  ctx.textAlign  = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillText(text, 0, 0);
+  ctx.restore();
+}
+$('sig-type-text').addEventListener('input', renderTypePreview);
+$('sig-ink-type').addEventListener('input', renderTypePreview);
+renderTypePreview();
+
+/* ────────────────────────────────────────────────────────
+   UPLOAD TAB
+──────────────────────────────────────────────────────── */
+const upZone = $('sig-upload-zone'), upFile = $('sig-upload-file'), upBox = $('sig-upload-preview-box');
+upZone.addEventListener('click', () => upFile.click());
+upZone.addEventListener('keydown', e => (e.key === 'Enter' || e.key === ' ') && upFile.click());
+upZone.addEventListener('dragover', e => { e.preventDefault(); upZone.classList.add('dragover'); });
+upZone.addEventListener('dragleave', () => upZone.classList.remove('dragover'));
+upZone.addEventListener('drop', e => { e.preventDefault(); upZone.classList.remove('dragover'); if (e.dataTransfer.files[0]) loadUploadImg(e.dataTransfer.files[0]); });
+upFile.addEventListener('change', e => { if (e.target.files[0]) loadUploadImg(e.target.files[0]); });
+
+function loadUploadImg(file) {
+  const r = new FileReader();
+  r.onload = ev => {
+    const img = new Image();
+    img.onload = () => {
+      const c = $('sig-upload-preview-canvas');
+      const ctx = c.getContext('2d'); ctx.clearRect(0, 0, c.width, c.height);
+      const ar = img.width / img.height;
+      const w  = Math.min(c.width, c.height * ar), h = w / ar;
+      ctx.drawImage(img, (c.width - w) / 2, (c.height - h) / 2, w, h);
+      upBox.classList.add('show');
+    };
+    img.src = ev.target.result;
+  };
+  r.readAsDataURL(file);
+}
+
+/* ────────────────────────────────────────────────────────
+   Trim transparent edges from canvas
+──────────────────────────────────────────────────────── */
+function trimCanvas(src) {
+  const ctx = src.getContext('2d');
+  const d   = ctx.getImageData(0, 0, src.width, src.height).data;
+  let x0 = src.width, y0 = src.height, x1 = 0, y1 = 0;
+  for (let y = 0; y < src.height; y++)
+    for (let x = 0; x < src.width; x++)
+      if (d[(y * src.width + x) * 4 + 3] > 10) {
+        if (x < x0) x0 = x; if (x > x1) x1 = x;
+        if (y < y0) y0 = y; if (y > y1) y1 = y;
+      }
+  if (x1 <= x0 || y1 <= y0) return src.toDataURL('image/png');
+  const p = 12;
+  x0 = Math.max(0, x0 - p); y0 = Math.max(0, y0 - p);
+  x1 = Math.min(src.width - 1, x1 + p); y1 = Math.min(src.height - 1, y1 + p);
+  const t = document.createElement('canvas'); t.width = x1 - x0; t.height = y1 - y0;
+  t.getContext('2d').drawImage(src, x0, y0, t.width, t.height, 0, 0, t.width, t.height);
+  return t.toDataURL('image/png');
+}
+
+/* ────────────────────────────────────────────────────────
+   Get current tab's signature as data URL
+──────────────────────────────────────────────────────── */
+function getActiveSigUrl() {
+  const tab = document.querySelector('.sig-tab.active')?.dataset.tab;
+  if (tab === 'draw')   return drawHasInk ? trimCanvas($('sig-draw-canvas')) : null;
+  if (tab === 'type')   { if (!$('sig-type-text').value.trim()) return null; renderTypePreview(); return trimCanvas($('sig-type-preview-canvas')); }
+  if (tab === 'upload') return upBox.classList.contains('show') ? $('sig-upload-preview-canvas').toDataURL('image/png') : null;
+  return null;
+}
+
+/* ────────────────────────────────────────────────────────
+   Saved signatures
+──────────────────────────────────────────────────────── */
+function renderSavedSigs() {
+  const list = $('sig-saved-list'); list.innerHTML = '';
+  if (!savedSigs.length) { list.innerHTML = '<span class="sig-saved-empty">None yet — save a signature to reuse it.</span>'; return; }
+  savedSigs.forEach((url, i) => {
+    const item = document.createElement('div'); item.className = 'saved-sig-item';
+    const img  = document.createElement('img');
+    img.className = 'saved-sig-thumb'; img.src = url; img.title = `Signature ${i + 1} — click to place`;
+    img.addEventListener('click', () => { pendingSigUrl = url; closeSigModal(); enterSigPlaceMode(); });
+    const del = document.createElement('button'); del.className = 'saved-sig-del'; del.textContent = '✕'; del.title = 'Delete';
+    del.addEventListener('click', e => { e.stopPropagation(); savedSigs.splice(i, 1); persistSigs(); renderSavedSigs(); });
+    item.appendChild(img); item.appendChild(del); list.appendChild(item);
+  });
+}
+
+/* Save only */
+$('sig-save-btn').addEventListener('click', () => {
+  const url = getActiveSigUrl();
+  if (!url) { alert('Nothing to save — draw, type, or upload a signature first.'); return; }
+  savedSigs = [url, ...savedSigs.filter(u => u !== url)].slice(0, 12);
+  persistSigs(); renderSavedSigs();
+});
+
+/* Place button */
+$('sig-place-btn').addEventListener('click', () => {
+  const url = getActiveSigUrl();
+  if (!url) { alert('Nothing to place — draw, type, or upload a signature first.'); return; }
+  savedSigs = [url, ...savedSigs.filter(u => u !== url)].slice(0, 12);
+  persistSigs();
+  pendingSigUrl = url;
+  closeSigModal();
+  enterSigPlaceMode();
+});
+
+/* ════════════════════════════════════════════════════════════════════════════
+   SIGNATURE PLACEMENT — ghost cursor + click to place
+════════════════════════════════════════════════════════════════════════════ */
+const ghostEl = $('sig-ghost');
+
+function enterSigPlaceMode() {
+  mode = 'sigPlace';
+  document.body.classList.add('sig-place-active');
+  $('sig-place-hint').style.display = 'block';
+  ghostEl.src = pendingSigUrl;
+  toolDefs.forEach(({ id }) => { const b = $(id); b?.classList.remove('active'); b?.setAttribute('aria-pressed','false'); });
+  document.addEventListener('mousemove', moveGhost);
+}
+
+function moveGhost(e) {
+  ghostEl.style.left = e.clientX + 'px';
+  ghostEl.style.top  = e.clientY + 'px';
+}
+
+function cancelSigPlace() {
+  if (mode !== 'sigPlace') return;
+  document.body.classList.remove('sig-place-active');
+  $('sig-place-hint').style.display = 'none';
+  ghostEl.src = '';
+  pendingSigUrl = null;
+  document.removeEventListener('mousemove', moveGhost);
+}
+
+function enablePageClick(container, pi) {
+  container.addEventListener('click', e => {
+    if (mode !== 'sigPlace' || !pendingSigUrl) return;
+    if (e.target.closest('.placed-sig')) return;
+    const r = container.getBoundingClientRect();
+    const wPct = 22, hPct = wPct * 0.4;
+    const sig = {
+      id: Date.now(), pi,
+      l: Math.max(0, Math.min(100 - wPct, (e.clientX - r.left) / r.width  * 100 - wPct / 2)),
+      t: Math.max(0, Math.min(100 - hPct, (e.clientY - r.top)  / r.height * 100 - hPct / 2)),
+      w: wPct, h: hPct, url: pendingSigUrl, el: null,
+    };
+    placedSigs.push(sig);
+    attachSigEl(sig);
+    cancelSigPlace(); setMode('pen');
+  });
+}
+
+/* ════════════════════════════════════════════════════════════════════════════
+   PLACED SIGNATURE ELEMENT
+════════════════════════════════════════════════════════════════════════════ */
+function attachSigEl(sig) {
+  const container = pageContainers[sig.pi]; if (!container) return;
+
+  const el = document.createElement('div');
+  el.className = 'placed-sig'; el.dataset.sigId = sig.id;
+  el.style.cssText = `left:${sig.l}%;top:${sig.t}%;width:${sig.w}%;height:${sig.h}%;`;
+
+  const img = document.createElement('img'); img.src = sig.url; img.draggable = false;
+  el.appendChild(img);
+
+  // Control bar (top right)
+  const ctrlBar = document.createElement('div'); ctrlBar.className = 'sig-ctrl-bar';
+
+  const dupBtn = document.createElement('button'); dupBtn.className = 'sig-ctrl-btn'; dupBtn.textContent = '⧉ Dup';
+  dupBtn.addEventListener('click', e => {
+    e.stopPropagation();
+    const copy = { ...sig, id: Date.now(), l: sig.l + 2, t: sig.t + 2, el: null };
+    placedSigs.push(copy); attachSigEl(copy);
+  });
+
+  const delBtn = document.createElement('button'); delBtn.className = 'sig-ctrl-btn del'; delBtn.textContent = '✕';
+  delBtn.addEventListener('click', e => { e.stopPropagation(); placedSigs = placedSigs.filter(s => s.id !== sig.id); el.remove(); });
+
+  ctrlBar.appendChild(dupBtn); ctrlBar.appendChild(delBtn); el.appendChild(ctrlBar);
+
+  // Resize handle
+  const rh = document.createElement('div'); rh.className = 'sig-resize-h'; el.appendChild(rh);
+
+  // Drag
+  el.addEventListener('mousedown', e => {
+    if (e.target === rh || e.target.closest('.sig-ctrl-btn')) return;
+    e.preventDefault(); e.stopPropagation(); el.classList.add('sel');
+    const [sx, sy, sl, st] = [e.clientX, e.clientY, sig.l, sig.t];
+    const mv = e2 => {
+      const r = container.getBoundingClientRect();
+      sig.l = Math.max(0, Math.min(100 - sig.w, sl + (e2.clientX - sx) / r.width  * 100));
+      sig.t = Math.max(0, Math.min(100 - sig.h, st + (e2.clientY - sy) / r.height * 100));
+      el.style.left = sig.l + '%'; el.style.top = sig.t + '%';
+    };
+    const up = () => { document.removeEventListener('mousemove', mv); document.removeEventListener('mouseup', up); };
+    document.addEventListener('mousemove', mv); document.addEventListener('mouseup', up);
+  });
+
+  // Resize
+  rh.addEventListener('mousedown', e => {
+    e.preventDefault(); e.stopPropagation();
+    const [sx, sw, asp] = [e.clientX, sig.w, sig.w / sig.h];
+    const mv = e2 => {
+      const r = container.getBoundingClientRect();
+      sig.w = Math.max(4, sw + (e2.clientX - sx) / r.width * 100);
+      sig.h = sig.w / asp;
+      el.style.width = sig.w + '%'; el.style.height = sig.h + '%';
+    };
+    const up = () => { document.removeEventListener('mousemove', mv); document.removeEventListener('mouseup', up); };
+    document.addEventListener('mousemove', mv); document.addEventListener('mouseup', up);
+  });
+
+  document.addEventListener('click', e => { if (!el.contains(e.target)) el.classList.remove('sel'); }, true);
+  container.appendChild(el); sig.el = el;
+}
+
+/* ════════════════════════════════════════════════════════════════════════════
+   KEYBOARD SHORTCUTS
+════════════════════════════════════════════════════════════════════════════ */
+document.addEventListener('keydown', e => {
+  // Modal sig-draw undo
+  if (!$('sig-backdrop').classList.contains('hidden')) {
+    if ((e.ctrlKey || e.metaKey) && e.key === 'z' && !e.shiftKey) { e.preventDefault(); $('sig-undo-draw').click(); return; }
+  }
+  if (e.key === 'Escape') { closeSigModal(); cancelSigPlace(); if (mode !== 'pen') setMode('pen'); return; }
+  if ((e.ctrlKey || e.metaKey) && e.key === '=') { e.preventDefault(); applyZoom(zoomCss * 100 + 10); return; }
+  if ((e.ctrlKey || e.metaKey) && e.key === '-') { e.preventDefault(); applyZoom(zoomCss * 100 - 10); return; }
+  if ((e.ctrlKey || e.metaKey) && e.key === '0') { e.preventDefault(); applyZoom(100); return; }
+  if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+  if (e.key === 'p') setMode('pen');
+  if (e.key === 'h') setMode('highlight');
+  if (e.key === 'e') setMode('eraser');
+  if ((e.ctrlKey || e.metaKey) && e.key === 'z' && !e.shiftKey) { e.preventDefault(); $('undo-btn').click(); }
+  if ((e.ctrlKey || e.metaKey) && (e.key === 'y' || (e.key === 'z' && e.shiftKey))) { e.preventDefault(); $('redo-btn').click(); }
+  if ((e.ctrlKey || e.metaKey) && e.key === 's') { e.preventDefault(); saveAsPDF(); }
+});
+</script>
+</body>
+</html>
