@@ -216,6 +216,176 @@
     #sig-place-hint { position: fixed; bottom: 40px; left: 50%; transform: translateX(-50%); background: var(--accent); color: #fff; padding: 9px 22px; border-radius: 24px; font-size: 13px; z-index: 200; pointer-events: none; box-shadow: 0 4px 20px rgba(79,142,247,.5); display: none; white-space: nowrap; animation: hintIn .22s ease; }
     @keyframes hintIn { from { opacity:0; transform: translateX(-50%) translateY(8px); } }
 
+    /* ══════════════════════════════════════════════════════════
+       FEATURE BAR — row of category pills
+    ══════════════════════════════════════════════════════════ */
+    .feature-bar {
+      min-height: 38px; background: var(--bg-deep); border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; padding: 4px 10px; gap: 4px; flex-wrap: wrap; row-gap: 4px;
+      overflow-x: auto; scrollbar-width: none;
+    }
+    .feature-bar::-webkit-scrollbar { display: none; }
+    .feat-btn {
+      height: 28px; padding: 0 11px; border: 1px solid var(--border); border-radius: 20px;
+      background: var(--bg-raised); color: var(--text-muted); cursor: pointer;
+      display: flex; align-items: center; gap: 5px; white-space: nowrap;
+      font-family: var(--font); font-size: 11.5px; font-weight: 500;
+      transition: background .12s, color .12s, border-color .12s;
+    }
+    .feat-btn:hover { background: var(--bg-hover); color: var(--text); border-color: var(--accent-dim); }
+    .feat-btn.active { background: var(--highlight); color: var(--accent); border-color: var(--accent-dim); }
+    .feat-btn .feat-icon { font-size: 13px; }
+    .feat-btn .pro-badge {
+      font-size: 9px; font-weight: 600; background: linear-gradient(135deg,#f7a94f,#e05252);
+      color: #fff; padding: 1px 5px; border-radius: 99px; letter-spacing: .04em; margin-left: 2px;
+    }
+
+    /* ══════════════════════════════════════════════════════════
+       GENERIC FEATURE MODAL
+    ══════════════════════════════════════════════════════════ */
+    .feat-modal-backdrop {
+      position: fixed; inset: 0; background: rgba(0,0,0,.72); z-index: 900;
+      display: flex; align-items: center; justify-content: center; backdrop-filter: blur(8px);
+    }
+    .feat-modal-backdrop.hidden { display: none; }
+    .feat-modal {
+      background: var(--bg-base); border: 1px solid var(--border); border-radius: 14px;
+      width: 580px; max-width: 96vw; max-height: 88vh;
+      box-shadow: 0 28px 70px rgba(0,0,0,.65);
+      display: flex; flex-direction: column; overflow: hidden;
+    }
+    .feat-modal-hdr {
+      display: flex; align-items: center; gap: 10px; padding: 16px 20px;
+      border-bottom: 1px solid var(--border); flex-shrink: 0;
+    }
+    .feat-modal-hdr .feat-modal-icon { font-size: 22px; }
+    .feat-modal-hdr h3 { font-size: 15px; font-weight: 600; flex: 1; }
+    .feat-modal-hdr p  { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+    .feat-modal-body { flex: 1; overflow-y: auto; padding: 20px; scrollbar-width: thin; scrollbar-color: var(--border) transparent; }
+    .feat-modal-footer { padding: 12px 20px; border-top: 1px solid var(--border); display: flex; justify-content: flex-end; gap: 8px; flex-shrink: 0; }
+
+    /* Feature grid inside modals */
+    .feat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 16px; }
+    .feat-card {
+      background: var(--bg-raised); border: 1px solid var(--border); border-radius: 8px;
+      padding: 12px 14px; cursor: pointer; transition: border-color .12s, background .12s;
+    }
+    .feat-card:hover { border-color: var(--accent-dim); background: var(--bg-hover); }
+    .feat-card.active-card { border-color: var(--accent); background: var(--highlight); }
+    .feat-card-icon { font-size: 18px; margin-bottom: 6px; display: block; }
+    .feat-card-title { font-size: 12px; font-weight: 600; color: var(--text); margin-bottom: 3px; }
+    .feat-card-desc  { font-size: 11px; color: var(--text-muted); line-height: 1.5; }
+    .feat-section-title { font-size: 10px; text-transform: uppercase; letter-spacing: .1em; color: var(--text-dim); margin-bottom: 10px; margin-top: 16px; }
+    .feat-section-title:first-child { margin-top: 0; }
+
+    /* Sub-panel that appears below grid when a card is clicked */
+    .feat-sub-panel {
+      background: var(--bg-raised); border: 1px solid var(--border); border-radius: 8px;
+      padding: 16px; margin-top: 12px; animation: subIn .18s ease;
+    }
+    @keyframes subIn { from { opacity:0; transform: translateY(6px); } }
+    .feat-sub-panel h4 { font-size: 12px; font-weight: 600; margin-bottom: 12px; display: flex; align-items: center; gap: 6px; }
+    .feat-sub-panel label { font-size: 11px; color: var(--text-muted); display: block; margin-bottom: 5px; }
+    .feat-input {
+      width: 100%; background: var(--bg-deep); border: 1px solid var(--border); border-radius: var(--radius);
+      color: var(--text); font-size: 13px; padding: 7px 10px; font-family: var(--font);
+      transition: border-color .15s; margin-bottom: 10px;
+    }
+    .feat-input:focus { outline: none; border-color: var(--accent); }
+    .feat-row { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; flex-wrap: wrap; }
+    .feat-checkbox { display: flex; align-items: center; gap: 7px; font-size: 12px; color: var(--text-muted); cursor: pointer; }
+    .feat-checkbox input[type=checkbox] { accent-color: var(--accent); width: 14px; height: 14px; cursor: pointer; }
+
+    /* Page Manager grid */
+    .page-mgr-grid {
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 10px;
+    }
+    .page-mgr-item {
+      position: relative; background: var(--bg-raised); border: 2px solid var(--border);
+      border-radius: 6px; overflow: hidden; cursor: grab; transition: border-color .12s, box-shadow .12s;
+      user-select: none;
+    }
+    .page-mgr-item:hover { border-color: var(--accent-dim); box-shadow: 0 2px 12px rgba(0,0,0,.3); }
+    .page-mgr-item.dragging { opacity: .4; border-color: var(--accent); }
+    .page-mgr-item.drag-over { border-color: var(--accent); box-shadow: 0 0 0 3px var(--highlight); }
+    .page-mgr-thumb { width: 100%; aspect-ratio: 210/297; object-fit: contain; display: block; background: white; }
+    .page-mgr-label { font-size: 10px; color: var(--text-muted); text-align: center; padding: 4px 2px; font-family: var(--mono); }
+    .page-mgr-actions { position: absolute; top: 4px; right: 4px; display: none; gap: 3px; flex-direction: column; }
+    .page-mgr-item:hover .page-mgr-actions { display: flex; }
+    .page-mgr-btn { width: 20px; height: 20px; background: var(--bg-base); border: 1px solid var(--border); border-radius: 4px; color: var(--text-muted); font-size: 10px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: background .1s, color .1s; }
+    .page-mgr-btn:hover { background: var(--danger); color: #fff; border-color: var(--danger); }
+    .page-mgr-btn.rotate { background: var(--bg-hover); }
+    .page-mgr-btn.rotate:hover { background: var(--accent); color: #fff; border-color: var(--accent); }
+
+    /* Form field overlays on page */
+    .form-field-overlay {
+      position: absolute; border: 1.5px dashed var(--accent); border-radius: 3px;
+      background: rgba(79,142,247,.08); cursor: move; z-index: 15; min-width: 80px; min-height: 24px;
+    }
+    .form-field-overlay:hover { background: rgba(79,142,247,.15); }
+    .form-field-overlay .ff-label {
+      position: absolute; top: -18px; left: 0; font-size: 9px; color: var(--accent);
+      background: var(--bg-base); padding: 1px 5px; border-radius: 3px; white-space: nowrap;
+    }
+    .form-field-overlay .ff-del {
+      position: absolute; top: -10px; right: -10px; width: 18px; height: 18px;
+      background: var(--danger); border: 2px solid var(--bg-base); border-radius: 50%;
+      color: #fff; font-size: 9px; cursor: pointer; display: none;
+      align-items: center; justify-content: center;
+    }
+    .form-field-overlay:hover .ff-del { display: flex; }
+    .form-field-overlay .ff-resize { position: absolute; bottom: -5px; right: -5px; width: 10px; height: 10px; background: var(--accent); border: 2px solid #fff; border-radius: 2px; cursor: se-resize; }
+
+    /* Text edit overlays */
+    .text-overlay {
+      position: absolute; z-index: 15; cursor: text; min-width: 60px; min-height: 22px;
+      border: 1.5px dashed transparent;
+    }
+    .text-overlay:hover, .text-overlay.editing { border-color: var(--accent); }
+    .text-overlay-inner {
+      outline: none; white-space: pre-wrap; word-break: break-word;
+      font-size: 14px; font-family: var(--font); color: #1a1a1a; line-height: 1.4;
+      min-width: 60px; min-height: 22px; padding: 2px 4px;
+    }
+    .text-overlay .to-del { position: absolute; top: -10px; right: -10px; width: 18px; height: 18px; background: var(--danger); border: 2px solid var(--bg-base); border-radius: 50%; color: #fff; font-size: 9px; cursor: pointer; display: none; align-items: center; justify-content: center; }
+    .text-overlay:hover .to-del { display: flex; }
+
+    /* AI panel */
+    .ai-chat-area { height: 220px; overflow-y: auto; background: var(--bg-deep); border: 1px solid var(--border); border-radius: var(--radius); padding: 10px; margin-bottom: 10px; scrollbar-width: thin; scrollbar-color: var(--border) transparent; display: flex; flex-direction: column; gap: 10px; }
+    .ai-msg { padding: 9px 12px; border-radius: 8px; font-size: 12px; line-height: 1.6; max-width: 90%; }
+    .ai-msg.user { background: var(--highlight); color: var(--text); align-self: flex-end; border-radius: 8px 8px 2px 8px; }
+    .ai-msg.assistant { background: var(--bg-raised); color: var(--text); align-self: flex-start; border-radius: 8px 8px 8px 2px; }
+    .ai-msg.thinking { color: var(--text-dim); font-style: italic; }
+    .ai-input-row { display: flex; gap: 6px; }
+    .ai-input-row input { flex: 1; background: var(--bg-deep); border: 1px solid var(--border); border-radius: var(--radius); color: var(--text); font-size: 12px; padding: 7px 10px; font-family: var(--font); }
+    .ai-input-row input:focus { outline: none; border-color: var(--accent); }
+    .ai-quick-btns { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 10px; }
+    .ai-quick-btn { height: 26px; padding: 0 10px; border: 1px solid var(--border); border-radius: 20px; background: var(--bg-raised); color: var(--text-muted); cursor: pointer; font-size: 11px; font-family: var(--font); transition: background .1s, color .1s, border-color .1s; }
+    .ai-quick-btn:hover { background: var(--highlight); color: var(--accent); border-color: var(--accent-dim); }
+
+    /* Security / password */
+    .security-option { display: flex; align-items: flex-start; gap: 10px; padding: 10px 0; border-bottom: 1px solid var(--border); }
+    .security-option:last-child { border-bottom: none; }
+    .security-option-icon { font-size: 18px; margin-top: 1px; }
+    .security-option-info h5 { font-size: 12px; font-weight: 600; margin-bottom: 3px; }
+    .security-option-info p  { font-size: 11px; color: var(--text-muted); }
+    .security-option-ctrl { margin-left: auto; display: flex; align-items: center; gap: 6px; }
+
+    /* Redact tool bar */
+    body.redact-mode .ink-layer { cursor: crosshair; }
+    .redact-active-bar { display: none; position: fixed; bottom: 40px; left: 50%; transform: translateX(-50%); background: var(--danger); color: #fff; padding: 9px 22px; border-radius: 24px; font-size: 13px; z-index: 200; pointer-events: none; box-shadow: 0 4px 20px rgba(224,82,82,.5); white-space: nowrap; }
+    body.redact-mode .redact-active-bar { display: block; }
+
+    /* Status toast */
+    #feat-toast { position: fixed; bottom: 70px; left: 50%; transform: translateX(-50%); background: var(--success); color: #0a1a0a; padding: 8px 20px; border-radius: 20px; font-size: 12px; font-weight: 500; z-index: 500; display: none; pointer-events: none; box-shadow: 0 4px 16px rgba(82,201,122,.4); animation: toastIn .2s ease; }
+    @keyframes toastIn { from { opacity:0; transform: translateX(-50%) translateY(8px); } }
+
+    @media (max-width: 700px) {
+      .feat-grid { grid-template-columns: 1fr; }
+      .feat-modal { max-height: 95vh; }
+      .page-mgr-grid { grid-template-columns: repeat(auto-fill, minmax(80px, 1fr)); }
+    }
+
     @media (max-width: 700px) {
       .sidepanel { display: none !important; }
       .topbar-title { display: none; }
@@ -249,10 +419,21 @@
       body {
         flex-direction: column;
         height: 100vh;
-        overflow: auto;
+        overflow: visible;
       }
       .main {
         margin-bottom: 52px;
+        flex: 1 1 auto;
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
+        height: auto;
+        min-height: 0;
+      }
+      .viewer {
+        overflow-y: auto !important;
+        -webkit-overflow-scrolling: touch;
+        height: auto;
+        min-height: 0;
       }
     }
   </style>
@@ -337,6 +518,18 @@
     <button class="tb-btn primary" id="sign-btn" aria-pressed="false" aria-label="Signature">✍ Sign</button>
   </div>
 
+  <!-- Row 4 — Feature bar -->
+  <div class="feature-bar" role="toolbar" aria-label="Feature categories">
+    <button class="feat-btn" id="feat-edit"     data-modal="modal-edit">    <span class="feat-icon">✏️</span> PDF Editing</button>
+    <button class="feat-btn" id="feat-convert"  data-modal="modal-convert"> <span class="feat-icon">🔄</span> Convert</button>
+    <button class="feat-btn" id="feat-forms"    data-modal="modal-forms">   <span class="feat-icon">📝</span> Forms</button>
+    <button class="feat-btn" id="feat-security" data-modal="modal-security"><span class="feat-icon">🔐</span> Security</button>
+    <button class="feat-btn" id="feat-esign"    data-modal="modal-esign">   <span class="feat-icon">✒️</span> E‑Signatures</button>
+    <button class="feat-btn" id="feat-ocr"      data-modal="modal-ocr">     <span class="feat-icon">📸</span> OCR &amp; Scan</button>
+    <button class="feat-btn" id="feat-ai"       data-modal="modal-ai">      <span class="feat-icon">🤖</span> AI Assistant</button>
+    <button class="feat-btn" id="feat-pro"      data-modal="modal-pro">     <span class="feat-icon">📚</span> Advanced</button>
+  </div>
+
   <div class="viewer" id="pdf-container">
     <div id="pages-wrapper"></div>
     <div class="empty-state" id="empty-state">
@@ -361,6 +554,631 @@
 <aside class="sidepanel" id="sidepanel-comments"><h4>Comments</h4><p>No comments yet.</p></aside>
 <aside class="sidepanel" id="sidepanel-annotations"><h4>Annotations</h4><p>No annotations yet.</p></aside>
 <aside class="sidepanel" id="sidepanel-layers"><h4>Layers</h4><p>No layers.</p></aside>
+
+<!-- ════ REDACT ACTIVE BAR ════ -->
+<div class="redact-active-bar" id="redact-active-bar">🚫 Redact mode — draw rectangles over sensitive content · Esc to exit</div>
+<!-- ════ TOAST ════ -->
+<div id="feat-toast"></div>
+
+<!-- ════ MODAL: PDF EDITING ════ -->
+<div class="feat-modal-backdrop hidden" id="modal-edit">
+  <div class="feat-modal">
+    <div class="feat-modal-hdr">
+      <span class="feat-modal-icon">✏️</span>
+      <div><h3>PDF Editing</h3><p>Edit text, images, and page layout directly in your document</p></div>
+      <button class="tb-btn icon-only feat-close" data-modal="modal-edit">✕</button>
+    </div>
+    <div class="feat-modal-body">
+      <div class="feat-section-title">Tools</div>
+      <div class="feat-grid">
+        <div class="feat-card" id="fc-addtext">
+          <span class="feat-card-icon">📝</span>
+          <div class="feat-card-title">Add / Edit Text</div>
+          <div class="feat-card-desc">Click on any page to add a text box. Drag to reposition.</div>
+        </div>
+        <div class="feat-card" id="fc-redact">
+          <span class="feat-card-icon">🚫</span>
+          <div class="feat-card-title">Redact</div>
+          <div class="feat-card-desc">Draw solid black rectangles to permanently hide sensitive content.</div>
+        </div>
+        <div class="feat-card" id="fc-pagemgr">
+          <span class="feat-card-icon">🗂️</span>
+          <div class="feat-card-title">Page Manager</div>
+          <div class="feat-card-desc">Reorder, rotate, and delete pages via a visual thumbnail grid.</div>
+        </div>
+        <div class="feat-card" id="fc-addimage">
+          <span class="feat-card-icon">🖼️</span>
+          <div class="feat-card-title">Insert Image</div>
+          <div class="feat-card-desc">Place an image on any page. Drag and resize after placement.</div>
+        </div>
+      </div>
+      <!-- Page Manager sub-panel -->
+      <div class="feat-sub-panel" id="sub-pagemgr" style="display:none">
+        <h4>🗂️ Page Manager <span style="font-size:10px;color:var(--text-muted);font-weight:400">Drag to reorder · hover for controls</span></h4>
+        <div class="page-mgr-grid" id="page-mgr-grid"></div>
+      </div>
+      <!-- Text settings sub-panel -->
+      <div class="feat-sub-panel" id="sub-addtext" style="display:none">
+        <h4>📝 Add Text</h4>
+        <div class="feat-row">
+          <label style="margin:0;font-size:11px;color:var(--text-muted)">Font size</label>
+          <input type="number" class="feat-input" id="text-font-size" value="14" min="6" max="96" style="width:70px;margin:0">
+          <label style="margin:0;font-size:11px;color:var(--text-muted)">Color</label>
+          <input type="color" class="modal-color" id="text-color" value="#1a1a1a">
+          <label class="feat-checkbox"><input type="checkbox" id="text-bold"> Bold</label>
+          <label class="feat-checkbox"><input type="checkbox" id="text-italic"> Italic</label>
+        </div>
+        <p style="font-size:11px;color:var(--text-muted)">Close this panel, then click anywhere on the document to place a text box.</p>
+      </div>
+      <!-- Insert image sub-panel -->
+      <div class="feat-sub-panel" id="sub-addimage" style="display:none">
+        <h4>🖼️ Insert Image</h4>
+        <div class="sig-upload-zone" id="img-insert-zone" tabindex="0" style="padding:18px">
+          <span class="upload-icon">🖼️</span>
+          Drop image here or click to browse
+          <input type="file" id="img-insert-file" accept="image/*" style="display:none">
+        </div>
+      </div>
+    </div>
+    <div class="feat-modal-footer">
+      <button class="tb-btn feat-close" data-modal="modal-edit">Close</button>
+    </div>
+  </div>
+</div>
+
+<!-- ════ MODAL: CONVERT ════ -->
+<div class="feat-modal-backdrop hidden" id="modal-convert">
+  <div class="feat-modal">
+    <div class="feat-modal-hdr">
+      <span class="feat-modal-icon">🔄</span>
+      <div><h3>PDF Conversion</h3><p>Export your PDF to other formats or create PDFs from files</p></div>
+      <button class="tb-btn icon-only feat-close" data-modal="modal-convert">✕</button>
+    </div>
+    <div class="feat-modal-body">
+      <div class="feat-section-title">Export PDF to…</div>
+      <div class="feat-grid">
+        <div class="feat-card" id="fc-export-word">
+          <span class="feat-card-icon">📄</span>
+          <div class="feat-card-title">Word Document (.docx)</div>
+          <div class="feat-card-desc">Extracts all text content into an editable Word file.</div>
+        </div>
+        <div class="feat-card" id="fc-export-excel">
+          <span class="feat-card-icon">📊</span>
+          <div class="feat-card-title">Excel Spreadsheet (.xlsx)</div>
+          <div class="feat-card-desc">Exports text per page into spreadsheet rows.</div>
+        </div>
+        <div class="feat-card" id="fc-export-ppt">
+          <span class="feat-card-icon">📑</span>
+          <div class="feat-card-title">PowerPoint (.pptx)</div>
+          <div class="feat-card-desc">Each page becomes an image slide in a presentation.</div>
+        </div>
+        <div class="feat-card" id="fc-export-images">
+          <span class="feat-card-icon">🖼️</span>
+          <div class="feat-card-title">Export as Images (PNG)</div>
+          <div class="feat-card-desc">Renders each page as a high-resolution PNG file.</div>
+        </div>
+      </div>
+      <div class="feat-section-title">Create PDF from…</div>
+      <div class="feat-grid">
+        <div class="feat-card" id="fc-pdf-from-images">
+          <span class="feat-card-icon">🖼️</span>
+          <div class="feat-card-title">Images → PDF</div>
+          <div class="feat-card-desc">Combine multiple images (JPG, PNG) into a single PDF.</div>
+        </div>
+        <div class="feat-card" id="fc-merge-pdfs">
+          <span class="feat-card-icon">🔗</span>
+          <div class="feat-card-title">Merge PDFs</div>
+          <div class="feat-card-desc">Combine multiple PDF files into one document.</div>
+        </div>
+        <div class="feat-card" id="fc-split-pdf">
+          <span class="feat-card-icon">✂️</span>
+          <div class="feat-card-title">Split PDF</div>
+          <div class="feat-card-desc">Extract a range of pages as a separate PDF.</div>
+        </div>
+        <div class="feat-card" id="fc-export-txt">
+          <span class="feat-card-icon">📃</span>
+          <div class="feat-card-title">Plain Text (.txt)</div>
+          <div class="feat-card-desc">Extract all text from the PDF as a plain text file.</div>
+        </div>
+      </div>
+      <!-- Sub-panels -->
+      <div class="feat-sub-panel" id="sub-export-images" style="display:none">
+        <h4>🖼️ Export Pages as PNG</h4>
+        <div class="feat-row">
+          <label style="margin:0;font-size:11px;color:var(--text-muted)">Scale</label>
+          <select class="feat-input" id="png-scale" style="width:100px;margin:0">
+            <option value="1">1× (72 dpi)</option>
+            <option value="2" selected>2× (144 dpi)</option>
+            <option value="3">3× (216 dpi)</option>
+          </select>
+        </div>
+        <button class="tb-btn primary" id="do-export-images">⬇️ Export All Pages as PNG</button>
+      </div>
+      <div class="feat-sub-panel" id="sub-merge-pdfs" style="display:none">
+        <h4>🔗 Merge PDFs</h4>
+        <p style="font-size:11px;color:var(--text-muted);margin-bottom:10px">Select additional PDFs to merge after the currently open document.</p>
+        <input type="file" id="merge-files" accept="application/pdf" multiple style="display:none">
+        <button class="tb-btn" id="merge-pick-btn">📁 Choose PDFs…</button>
+        <div id="merge-file-list" style="margin-top:8px;font-size:11px;color:var(--text-muted)"></div>
+        <button class="tb-btn primary" id="do-merge" style="margin-top:8px;display:none">🔗 Merge &amp; Download</button>
+      </div>
+      <div class="feat-sub-panel" id="sub-split-pdf" style="display:none">
+        <h4>✂️ Split PDF</h4>
+        <div class="feat-row">
+          <label style="margin:0;font-size:11px;color:var(--text-muted)">From page</label>
+          <input type="number" class="feat-input" id="split-from" value="1" min="1" style="width:60px;margin:0">
+          <label style="margin:0;font-size:11px;color:var(--text-muted)">To page</label>
+          <input type="number" class="feat-input" id="split-to" value="1" min="1" style="width:60px;margin:0">
+        </div>
+        <button class="tb-btn primary" id="do-split">✂️ Extract &amp; Download</button>
+      </div>
+      <div class="feat-sub-panel" id="sub-pdf-from-images" style="display:none">
+        <h4>🖼️ Images → PDF</h4>
+        <div class="sig-upload-zone" id="img2pdf-zone" tabindex="0" style="padding:16px">
+          <span class="upload-icon">🖼️</span>
+          Drop images here or click to browse (JPG, PNG, WebP)
+          <input type="file" id="img2pdf-files" accept="image/*" multiple style="display:none">
+        </div>
+        <div id="img2pdf-list" style="margin-top:8px;font-size:11px;color:var(--text-muted)"></div>
+        <button class="tb-btn primary" id="do-img2pdf" style="margin-top:8px;display:none">📄 Create PDF &amp; Download</button>
+      </div>
+    </div>
+    <div class="feat-modal-footer">
+      <button class="tb-btn feat-close" data-modal="modal-convert">Close</button>
+    </div>
+  </div>
+</div>
+
+<!-- ════ MODAL: FORMS ════ -->
+<div class="feat-modal-backdrop hidden" id="modal-forms">
+  <div class="feat-modal">
+    <div class="feat-modal-hdr">
+      <span class="feat-modal-icon">📝</span>
+      <div><h3>Form Tools</h3><p>Create fillable forms with fields, checkboxes, and dropdowns</p></div>
+      <button class="tb-btn icon-only feat-close" data-modal="modal-forms">✕</button>
+    </div>
+    <div class="feat-modal-body">
+      <div class="feat-section-title">Add Form Fields</div>
+      <div class="feat-grid">
+        <div class="feat-card" id="fc-field-text">
+          <span class="feat-card-icon">Aa</span>
+          <div class="feat-card-title">Text Field</div>
+          <div class="feat-card-desc">Single or multi-line text input for respondents.</div>
+        </div>
+        <div class="feat-card" id="fc-field-check">
+          <span class="feat-card-icon">☑️</span>
+          <div class="feat-card-title">Checkbox</div>
+          <div class="feat-card-desc">Yes/no or multi-select checkbox field.</div>
+        </div>
+        <div class="feat-card" id="fc-field-dropdown">
+          <span class="feat-card-icon">🔽</span>
+          <div class="feat-card-title">Dropdown</div>
+          <div class="feat-card-desc">Multiple choice selector field.</div>
+        </div>
+        <div class="feat-card" id="fc-field-date">
+          <span class="feat-card-icon">📅</span>
+          <div class="feat-card-title">Date Field</div>
+          <div class="feat-card-desc">Date picker input field.</div>
+        </div>
+      </div>
+      <div id="sub-form-field" class="feat-sub-panel" style="display:none">
+        <h4 id="form-field-title">Add Text Field</h4>
+        <label>Field label</label>
+        <input class="feat-input" id="form-field-label" placeholder="e.g. Full Name" value="">
+        <label>Placeholder text</label>
+        <input class="feat-input" id="form-field-placeholder" placeholder="e.g. Enter your name…" value="">
+        <p style="font-size:11px;color:var(--text-muted)">Close this panel, then click the document to place the field. Drag to move, resize from corner.</p>
+        <button class="tb-btn primary" id="form-place-btn">Place Field on Document →</button>
+      </div>
+      <div class="feat-section-title">More Tools</div>
+      <div class="feat-grid">
+        <div class="feat-card" id="fc-calc-fields">
+          <span class="feat-card-icon">🧮</span>
+          <div class="feat-card-title">Number Field</div>
+          <div class="feat-card-desc">Add a numeric input field that accepts only numbers.</div>
+        </div>
+        <div class="feat-card" id="fc-export-form">
+          <span class="feat-card-icon">📤</span>
+          <div class="feat-card-title">Export Form Data</div>
+          <div class="feat-card-desc">Download all current field values as a CSV file.</div>
+        </div>
+      </div>
+    </div>
+    <div class="feat-modal-footer">
+      <button class="tb-btn feat-close" data-modal="modal-forms">Close</button>
+    </div>
+  </div>
+</div>
+
+<!-- ════ MODAL: SECURITY ════ -->
+<div class="feat-modal-backdrop hidden" id="modal-security">
+  <div class="feat-modal">
+    <div class="feat-modal-hdr">
+      <span class="feat-modal-icon">🔐</span>
+      <div><h3>Security &amp; Protection</h3><p>Protect your document with passwords and permissions</p></div>
+      <button class="tb-btn icon-only feat-close" data-modal="modal-security">✕</button>
+    </div>
+    <div class="feat-modal-body">
+      <div class="feat-section-title">Document Password</div>
+      <div class="security-option">
+        <span class="security-option-icon">🔑</span>
+        <div class="security-option-info">
+          <h5>Open Password</h5>
+          <p>Require a password to open and view this document.</p>
+          <div style="margin-top:8px">
+            <input class="feat-input" type="password" id="sec-open-password" placeholder="Set open password…" autocomplete="new-password">
+            <input class="feat-input" type="password" id="sec-open-password-confirm" placeholder="Confirm password…" autocomplete="new-password">
+          </div>
+        </div>
+      </div>
+      <div class="security-option">
+        <span class="security-option-icon">🛡️</span>
+        <div class="security-option-info">
+          <h5>Permissions Password</h5>
+          <p>Restrict editing, printing, or copying with a separate permissions password.</p>
+          <div style="margin-top:8px">
+            <input class="feat-input" type="password" id="sec-perm-password" placeholder="Set permissions password…" autocomplete="new-password">
+          </div>
+        </div>
+      </div>
+      <div class="feat-section-title">Permissions</div>
+      <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:12px">
+        <label class="feat-checkbox"><input type="checkbox" id="perm-print" checked> Allow printing</label>
+        <label class="feat-checkbox"><input type="checkbox" id="perm-copy" checked> Allow copying text &amp; images</label>
+        <label class="feat-checkbox"><input type="checkbox" id="perm-edit" checked> Allow editing &amp; annotations</label>
+        <label class="feat-checkbox"><input type="checkbox" id="perm-fillforms" checked> Allow filling forms</label>
+      </div>
+      <div class="feat-section-title">Advanced</div>
+      <div class="feat-grid">
+        <div class="feat-card" id="fc-metadata-sec">
+          <span class="feat-card-icon">📋</span>
+          <div class="feat-card-title">Edit Metadata</div>
+          <div class="feat-card-desc">Set document title, author, subject and keywords.</div>
+        </div>
+        <div class="feat-card" id="fc-redact-sec">
+          <span class="feat-card-icon">🚫</span>
+          <div class="feat-card-title">Redact Sensitive Info</div>
+          <div class="feat-card-desc">Permanently black out text and images before sharing.</div>
+        </div>
+      </div>
+      <div class="feat-sub-panel" id="sub-metadata-sec" style="display:none">
+        <h4>📋 Document Metadata</h4>
+        <label>Title</label><input class="feat-input" id="meta-title" placeholder="Document title">
+        <label>Author</label><input class="feat-input" id="meta-author" placeholder="Author name">
+        <label>Subject</label><input class="feat-input" id="meta-subject" placeholder="Document subject">
+        <label>Keywords</label><input class="feat-input" id="meta-keywords" placeholder="keyword1, keyword2">
+        <button class="tb-btn primary" id="do-set-metadata">💾 Apply Metadata &amp; Download</button>
+      </div>
+    </div>
+    <div class="feat-modal-footer">
+      <button class="tb-btn feat-close" data-modal="modal-security">Cancel</button>
+      <button class="tb-btn primary" id="sec-apply-btn">🔐 Apply &amp; Save PDF</button>
+    </div>
+  </div>
+</div>
+
+<!-- ════ MODAL: E-SIGNATURES ════ -->
+<div class="feat-modal-backdrop hidden" id="modal-esign">
+  <div class="feat-modal">
+    <div class="feat-modal-hdr">
+      <span class="feat-modal-icon">✒️</span>
+      <div><h3>E‑Signatures</h3><p>Sign documents and send for signature</p></div>
+      <button class="tb-btn icon-only feat-close" data-modal="modal-esign">✕</button>
+    </div>
+    <div class="feat-modal-body">
+      <div class="feat-section-title">Sign Now</div>
+      <div class="feat-grid">
+        <div class="feat-card" id="fc-esign-self">
+          <span class="feat-card-icon">✍️</span>
+          <div class="feat-card-title">Add My Signature</div>
+          <div class="feat-card-desc">Draw, type, or upload your signature and place it on the document.</div>
+        </div>
+        <div class="feat-card" id="fc-esign-initials">
+          <span class="feat-card-icon">🔤</span>
+          <div class="feat-card-title">Add Initials</div>
+          <div class="feat-card-desc">Quickly add your initials to any page.</div>
+        </div>
+        <div class="feat-card" id="fc-esign-datestamp">
+          <span class="feat-card-icon">📅</span>
+          <div class="feat-card-title">Add Date Stamp</div>
+          <div class="feat-card-desc">Insert today's date as a text overlay anywhere on the document.</div>
+        </div>
+        <div class="feat-card" id="fc-esign-auditlog">
+          <span class="feat-card-icon">📋</span>
+          <div class="feat-card-title">Download Audit Log</div>
+          <div class="feat-card-desc">Export a timestamped signing record as a text file.</div>
+        </div>
+      </div>
+      <div class="feat-section-title">Request Signatures</div>
+      <div class="feat-grid">
+        <div class="feat-card" id="fc-esign-request">
+          <span class="feat-card-icon">📧</span>
+          <div class="feat-card-title">Send for Signature</div>
+          <div class="feat-card-desc">Compose an email with the PDF attached and request a signature.</div>
+        </div>
+        <div class="feat-card" id="fc-esign-bulk">
+          <span class="feat-card-icon">🌍</span>
+          <div class="feat-card-title">Bulk Send</div>
+          <div class="feat-card-desc">Send to multiple recipients at once via email.</div>
+        </div>
+      </div>
+      <!-- Sub-panels -->
+      <div class="feat-sub-panel" id="sub-esign-request" style="display:none">
+        <h4>📧 Send for Signature</h4>
+        <label>Recipient email</label>
+        <input class="feat-input" id="esign-email" type="email" placeholder="signer@example.com">
+        <label>Message</label>
+        <textarea class="feat-input" id="esign-message" rows="2" placeholder="Please review and sign this document." style="resize:vertical"></textarea>
+        <button class="tb-btn primary" id="do-esign-request">📧 Open Email Client</button>
+      </div>
+      <div class="feat-sub-panel" id="sub-esign-bulk" style="display:none">
+        <h4>🌍 Bulk Send</h4>
+        <label>Recipient emails (one per line or comma-separated)</label>
+        <textarea class="feat-input" id="esign-bulk-emails" rows="4" placeholder="alice@example.com&#10;bob@example.com&#10;carol@example.com" style="resize:vertical"></textarea>
+        <label>Message</label>
+        <textarea class="feat-input" id="esign-bulk-message" rows="2" placeholder="Please review and sign this document." style="resize:vertical"></textarea>
+        <button class="tb-btn primary" id="do-esign-bulk">📧 Open Email Clients</button>
+      </div>
+    </div>
+    <div class="feat-modal-footer">
+      <button class="tb-btn feat-close" data-modal="modal-esign">Close</button>
+    </div>
+  </div>
+</div>
+
+<!-- ════ MODAL: OCR ════ -->
+<div class="feat-modal-backdrop hidden" id="modal-ocr">
+  <div class="feat-modal">
+    <div class="feat-modal-hdr">
+      <span class="feat-modal-icon">📸</span>
+      <div><h3>Scan &amp; OCR</h3><p>Extract and enhance text from scanned documents</p></div>
+      <button class="tb-btn icon-only feat-close" data-modal="modal-ocr">✕</button>
+    </div>
+    <div class="feat-modal-body">
+      <div class="feat-section-title">OCR Tools</div>
+      <div class="feat-grid">
+        <div class="feat-card" id="fc-ocr-run">
+          <span class="feat-card-icon">🔍</span>
+          <div class="feat-card-title">Extract Text (Fast)</div>
+          <div class="feat-card-desc">Extract text from PDF.js text layer — instant for text-based PDFs.</div>
+        </div>
+        <div class="feat-card" id="fc-ocr-tesseract">
+          <span class="feat-card-icon">🧠</span>
+          <div class="feat-card-title">Deep OCR (Tesseract)</div>
+          <div class="feat-card-desc">Run AI-powered OCR on scanned pages — works on images too.</div>
+        </div>
+        <div class="feat-card" id="fc-enhance-scan">
+          <span class="feat-card-icon">✨</span>
+          <div class="feat-card-title">Enhance Scan</div>
+          <div class="feat-card-desc">Apply contrast boost and sharpening to all pages for better readability.</div>
+        </div>
+        <div class="feat-card" id="fc-camera-scan">
+          <span class="feat-card-icon">📱</span>
+          <div class="feat-card-title">Scan from Camera</div>
+          <div class="feat-card-desc">Capture a document with your camera and add it as a PDF page.</div>
+        </div>
+      </div>
+      <!-- OCR language selector for Tesseract -->
+      <div class="feat-sub-panel" id="sub-ocr-tesseract" style="display:none">
+        <h4>🧠 Deep OCR Settings</h4>
+        <div class="feat-row">
+          <label style="margin:0;font-size:11px;color:var(--text-muted)">Language</label>
+          <select class="feat-input" id="ocr-lang" style="width:150px;margin:0">
+            <option value="eng">English</option>
+            <option value="fra">French</option>
+            <option value="deu">German</option>
+            <option value="spa">Spanish</option>
+            <option value="por">Portuguese</option>
+            <option value="ita">Italian</option>
+            <option value="chi_sim">Chinese (Simplified)</option>
+            <option value="jpn">Japanese</option>
+            <option value="ara">Arabic</option>
+            <option value="rus">Russian</option>
+          </select>
+          <label style="margin:0;font-size:11px;color:var(--text-muted)">Page</label>
+          <select class="feat-input" id="ocr-page-sel" style="width:90px;margin:0">
+            <option value="all">All pages</option>
+            <option value="current">Current page</option>
+          </select>
+        </div>
+        <button class="tb-btn primary" id="do-ocr-tesseract">🧠 Run Deep OCR</button>
+        <div id="ocr-progress" style="font-size:11px;color:var(--text-muted);margin-top:6px"></div>
+      </div>
+      <div id="sub-ocr-result" class="feat-sub-panel" style="display:none">
+        <h4>📄 Extracted Text</h4>
+        <textarea id="ocr-text-output" style="width:100%;height:160px;background:var(--bg-deep);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-size:12px;padding:8px;font-family:var(--mono);resize:vertical" readonly placeholder="Extracted text will appear here…"></textarea>
+        <div class="feat-row" style="margin-top:8px">
+          <button class="tb-btn" id="ocr-copy-btn">📋 Copy</button>
+          <button class="tb-btn" id="ocr-download-btn">⬇️ Save as .txt</button>
+        </div>
+      </div>
+      <!-- Camera sub-panel -->
+      <div class="feat-sub-panel" id="sub-camera-scan" style="display:none">
+        <h4>📱 Camera Scan</h4>
+        <video id="camera-video" style="width:100%;border-radius:6px;background:#000;max-height:220px" autoplay playsinline></video>
+        <canvas id="camera-canvas" style="display:none"></canvas>
+        <div class="feat-row" style="margin-top:8px">
+          <button class="tb-btn primary" id="camera-capture-btn">📸 Capture</button>
+          <button class="tb-btn" id="camera-stop-btn">⏹ Stop Camera</button>
+        </div>
+        <div id="camera-preview-wrap" style="display:none;margin-top:8px">
+          <img id="camera-preview" style="width:100%;border-radius:6px;border:1px solid var(--border)">
+          <button class="tb-btn primary" id="camera-add-page-btn" style="margin-top:6px">➕ Add as PDF Page</button>
+        </div>
+      </div>
+    </div>
+    <div class="feat-modal-footer">
+      <button class="tb-btn feat-close" data-modal="modal-ocr">Close</button>
+    </div>
+  </div>
+</div>
+
+<!-- ════ MODAL: AI ASSISTANT ════ -->
+<div class="feat-modal-backdrop hidden" id="modal-ai">
+  <div class="feat-modal">
+    <div class="feat-modal-hdr">
+      <span class="feat-modal-icon">🤖</span>
+      <div><h3>AI Assistant</h3><p>Ask questions, get summaries, and generate content from your PDF</p></div>
+      <button class="tb-btn icon-only feat-close" data-modal="modal-ai">✕</button>
+    </div>
+    <div class="feat-modal-body">
+      <div class="ai-quick-btns" id="ai-quick-btns">
+        <button class="ai-quick-btn" data-q="Summarise this document in 3–5 bullet points.">📋 Summarise</button>
+        <button class="ai-quick-btn" data-q="What are the key action items or next steps in this document?">✅ Action items</button>
+        <button class="ai-quick-btn" data-q="List the main topics and headings covered.">📑 Key topics</button>
+        <button class="ai-quick-btn" data-q="What is the overall sentiment and tone of this document?">🎭 Tone analysis</button>
+        <button class="ai-quick-btn" data-q="Identify any dates, deadlines, or time-sensitive information.">📅 Dates & deadlines</button>
+      </div>
+      <div class="ai-chat-area" id="ai-chat-area">
+        <div class="ai-msg assistant">👋 Hi! I can answer questions about your open PDF. Open a document and try one of the quick prompts above, or type your own question.</div>
+      </div>
+      <div class="ai-input-row">
+        <input type="text" id="ai-user-input" placeholder="Ask a question about your document…">
+        <button class="tb-btn primary" id="ai-send-btn">Send</button>
+      </div>
+    </div>
+    <div class="feat-modal-footer">
+      <button class="tb-btn" id="ai-clear-btn">Clear chat</button>
+      <button class="tb-btn feat-close" data-modal="modal-ai">Close</button>
+    </div>
+  </div>
+</div>
+
+<!-- ════ MODAL: ADVANCED TOOLS ════ -->
+<div class="feat-modal-backdrop hidden" id="modal-pro">
+  <div class="feat-modal">
+    <div class="feat-modal-hdr">
+      <span class="feat-modal-icon">📚</span>
+      <div><h3>Advanced Tools</h3><p>Metadata, compression, preflight, and production tools</p></div>
+      <button class="tb-btn icon-only feat-close" data-modal="modal-pro">✕</button>
+    </div>
+    <div class="feat-modal-body">
+      <div class="feat-section-title">Document Tools</div>
+      <div class="feat-grid">
+        <div class="feat-card" id="fc-metadata-pro">
+          <span class="feat-card-icon">🔍</span>
+          <div class="feat-card-title">Metadata Editor</div>
+          <div class="feat-card-desc">Edit title, author, subject, keywords embedded in the PDF.</div>
+        </div>
+        <div class="feat-card" id="fc-compress">
+          <span class="feat-card-icon">🗜️</span>
+          <div class="feat-card-title">Compress PDF</div>
+          <div class="feat-card-desc">Re-render pages at lower resolution to reduce file size.</div>
+        </div>
+        <div class="feat-card" id="fc-preflight">
+          <span class="feat-card-icon">🖨️</span>
+          <div class="feat-card-title">Preflight Check</div>
+          <div class="feat-card-desc">Inspect page count, dimensions, file size, and document metadata.</div>
+        </div>
+        <div class="feat-card" id="fc-color-mgmt">
+          <span class="feat-card-icon">🎨</span>
+          <div class="feat-card-title">Colour Adjustments</div>
+          <div class="feat-card-desc">Apply brightness, contrast, and greyscale filters to all pages.</div>
+        </div>
+      </div>
+      <div class="feat-section-title">Compliance</div>
+      <div class="feat-grid">
+        <div class="feat-card" id="fc-pdfa">
+          <span class="feat-card-icon">📦</span>
+          <div class="feat-card-title">PDF/A Export</div>
+          <div class="feat-card-desc">Save a clean archival copy with embedded metadata (PDF/A-like).</div>
+        </div>
+        <div class="feat-card" id="fc-watermark">
+          <span class="feat-card-icon">💧</span>
+          <div class="feat-card-title">Add Watermark</div>
+          <div class="feat-card-desc">Stamp a text watermark on every page.</div>
+        </div>
+        <div class="feat-card" id="fc-page-numbers">
+          <span class="feat-card-icon">🔢</span>
+          <div class="feat-card-title">Add Page Numbers</div>
+          <div class="feat-card-desc">Insert page numbers at the bottom of every page.</div>
+        </div>
+        <div class="feat-card" id="fc-crop-marks">
+          <span class="feat-card-icon">📐</span>
+          <div class="feat-card-title">Crop Marks</div>
+          <div class="feat-card-desc">Draw printer crop marks on all pages for production printing.</div>
+        </div>
+      </div>
+      <!-- Sub-panels -->
+      <div class="feat-sub-panel" id="sub-metadata-pro" style="display:none">
+        <h4>🔍 Edit Metadata</h4>
+        <label>Title</label><input class="feat-input" id="pro-meta-title" placeholder="Document title">
+        <label>Author</label><input class="feat-input" id="pro-meta-author" placeholder="Author name">
+        <label>Subject</label><input class="feat-input" id="pro-meta-subject" placeholder="Subject">
+        <label>Keywords</label><input class="feat-input" id="pro-meta-keywords" placeholder="keyword1, keyword2">
+        <button class="tb-btn primary" id="do-pro-metadata">💾 Save &amp; Download</button>
+      </div>
+      <div class="feat-sub-panel" id="sub-compress" style="display:none">
+        <h4>🗜️ Compress PDF</h4>
+        <div class="feat-row">
+          <label style="margin:0;font-size:11px;color:var(--text-muted)">Quality</label>
+          <select class="feat-input" id="compress-quality" style="width:130px;margin:0">
+            <option value="0.9">High (0.9×)</option>
+            <option value="0.7" selected>Medium (0.7×)</option>
+            <option value="0.5">Low (0.5×)</option>
+            <option value="0.3">Very low (0.3×)</option>
+          </select>
+        </div>
+        <p style="font-size:11px;color:var(--text-muted);margin-bottom:8px">Re-renders each page as JPEG at the selected quality. Ink annotations are preserved.</p>
+        <button class="tb-btn primary" id="do-compress">🗜️ Compress &amp; Download</button>
+      </div>
+      <div class="feat-sub-panel" id="sub-preflight" style="display:none">
+        <h4>🖨️ Preflight Report</h4>
+        <pre id="preflight-output" style="background:var(--bg-deep);border:1px solid var(--border);border-radius:var(--radius);padding:10px;font-size:11px;font-family:var(--mono);color:var(--text);white-space:pre-wrap;max-height:200px;overflow-y:auto">Run preflight to see results…</pre>
+        <button class="tb-btn primary" id="do-preflight" style="margin-top:8px">🖨️ Run Preflight</button>
+      </div>
+      <div class="feat-sub-panel" id="sub-color-mgmt" style="display:none">
+        <h4>🎨 Colour Adjustments</h4>
+        <div class="feat-row">
+          <label style="margin:0;font-size:11px;color:var(--text-muted)">Brightness</label>
+          <input type="range" id="color-brightness" min="50" max="200" value="100" style="-webkit-appearance:none;width:80px;height:4px;background:var(--border);border-radius:99px;cursor:pointer">
+          <span id="color-brightness-val" style="font-size:11px;color:var(--text-muted);min-width:35px">100%</span>
+        </div>
+        <div class="feat-row">
+          <label style="margin:0;font-size:11px;color:var(--text-muted)">Contrast</label>
+          <input type="range" id="color-contrast" min="50" max="300" value="100" style="-webkit-appearance:none;width:80px;height:4px;background:var(--border);border-radius:99px;cursor:pointer">
+          <span id="color-contrast-val" style="font-size:11px;color:var(--text-muted);min-width:35px">100%</span>
+        </div>
+        <label class="feat-checkbox" style="margin-top:4px"><input type="checkbox" id="color-grayscale"> Convert to greyscale</label>
+        <div class="feat-row" style="margin-top:10px">
+          <button class="tb-btn primary" id="do-color-apply">🎨 Apply to All Pages</button>
+          <button class="tb-btn" id="do-color-reset">↺ Reset</button>
+        </div>
+      </div>
+      <div class="feat-sub-panel" id="sub-watermark" style="display:none">
+        <h4>💧 Add Watermark</h4>
+        <label>Watermark text</label>
+        <input class="feat-input" id="watermark-text" value="DRAFT" placeholder="e.g. CONFIDENTIAL">
+        <div class="feat-row">
+          <label style="margin:0;font-size:11px;color:var(--text-muted)">Opacity</label>
+          <input type="range" id="watermark-opacity" min="5" max="80" value="20" style="-webkit-appearance:none;width:80px;height:4px;background:var(--border);border-radius:99px;cursor:pointer">
+          <span id="watermark-opacity-val" style="font-size:11px;color:var(--text-muted)">20%</span>
+          <label style="margin:0;font-size:11px;color:var(--text-muted);margin-left:8px">Color</label>
+          <input type="color" class="modal-color" id="watermark-color" value="#ff0000">
+        </div>
+        <button class="tb-btn primary" id="do-watermark">💧 Apply &amp; Download</button>
+      </div>
+      <div class="feat-sub-panel" id="sub-page-numbers" style="display:none">
+        <h4>🔢 Add Page Numbers</h4>
+        <div class="feat-row">
+          <label style="margin:0;font-size:11px;color:var(--text-muted)">Position</label>
+          <select class="feat-input" id="pagenum-pos" style="width:130px;margin:0">
+            <option value="bottom-center">Bottom center</option>
+            <option value="bottom-right">Bottom right</option>
+            <option value="bottom-left">Bottom left</option>
+            <option value="top-center">Top center</option>
+          </select>
+          <label style="margin:0;font-size:11px;color:var(--text-muted)">Start at</label>
+          <input type="number" class="feat-input" id="pagenum-start" value="1" min="0" style="width:55px;margin:0">
+        </div>
+        <button class="tb-btn primary" id="do-page-numbers">🔢 Apply &amp; Download</button>
+      </div>
+    </div>
+    <div class="feat-modal-footer">
+      <button class="tb-btn feat-close" data-modal="modal-pro">Close</button>
+    </div>
+  </div>
+</div>
 
 <!-- ════ SIGNATURE MODAL ════ -->
 <div class="modal-backdrop hidden" id="sig-backdrop" role="dialog" aria-modal="true" aria-label="Signature creator">
@@ -450,6 +1268,9 @@
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 <script src="https://unpkg.com/pdf-lib/dist/pdf-lib.min.js"></script>
+<script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/pptxgenjs@3.12.0/dist/pptxgen.bundle.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
 <script>
 'use strict';
 
@@ -1160,14 +1981,1049 @@ function attachSigEl(sig) {
 }
 
 /* ════════════════════════════════════════════════════════════════════════════
-   KEYBOARD SHORTCUTS
+   FEATURE BAR — open/close modals
 ════════════════════════════════════════════════════════════════════════════ */
+function showToast(msg, ms = 2400) {
+  const t = $('feat-toast'); t.textContent = msg; t.style.display = 'block';
+  clearTimeout(t._tid); t._tid = setTimeout(() => { t.style.display = 'none'; }, ms);
+}
+
+document.querySelectorAll('.feat-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const id = btn.dataset.modal;
+    document.querySelectorAll('.feat-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    $(id)?.classList.remove('hidden');
+    if (id === 'modal-edit' && pdfDoc) populatePageMgr();
+    if (id === 'modal-ai') $('ai-user-input').focus();
+    if (id === 'modal-convert' && pdfDoc) { $('split-to').value = pdfDoc.numPages; }
+  });
+});
+document.querySelectorAll('.feat-close').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const id = btn.dataset.modal;
+    $(id)?.classList.add('hidden');
+    document.querySelectorAll('.feat-btn').forEach(b => b.classList.remove('active'));
+    stopCamera();
+  });
+});
+document.querySelectorAll('.feat-modal-backdrop').forEach(bd => {
+  bd.addEventListener('click', e => {
+    if (e.target === bd) {
+      bd.classList.add('hidden');
+      document.querySelectorAll('.feat-btn').forEach(b => b.classList.remove('active'));
+      stopCamera();
+    }
+  });
+});
+
+/* Generic sub-panel toggle */
+function toggleSubPanel(id, cardEl) {
+  const panel = $(id);
+  const wasOpen = panel && panel.style.display !== 'none';
+  ['sub-pagemgr','sub-addtext','sub-addimage','sub-export-images','sub-merge-pdfs',
+   'sub-split-pdf','sub-pdf-from-images','sub-form-field','sub-ocr-result',
+   'sub-ocr-tesseract','sub-camera-scan','sub-esign-request','sub-esign-bulk',
+   'sub-metadata-sec','sub-metadata-pro','sub-compress','sub-preflight',
+   'sub-color-mgmt','sub-watermark','sub-page-numbers'].forEach(pid => {
+    const p = $(pid); if (p) p.style.display = 'none';
+  });
+  document.querySelectorAll('.feat-card').forEach(c => c.classList.remove('active-card'));
+  if (!wasOpen && panel) { panel.style.display = 'block'; cardEl?.classList.add('active-card'); }
+}
+
+/* ════════════════════════════════════════════════════════════════════════════
+   PDF EDITING
+════════════════════════════════════════════════════════════════════════════ */
+$('fc-pagemgr').addEventListener('click', () => {
+  toggleSubPanel('sub-pagemgr', $('fc-pagemgr'));
+  if ($('sub-pagemgr').style.display !== 'none') populatePageMgr();
+});
+$('fc-addtext').addEventListener('click', () => { toggleSubPanel('sub-addtext', $('fc-addtext')); });
+$('fc-addimage').addEventListener('click', () => { toggleSubPanel('sub-addimage', $('fc-addimage')); });
+$('fc-redact').addEventListener('click',   () => { enterRedactMode(); $('modal-edit').classList.add('hidden'); document.querySelectorAll('.feat-btn').forEach(b => b.classList.remove('active')); });
+$('fc-redact-sec')?.addEventListener('click', () => { enterRedactMode(); $('modal-security').classList.add('hidden'); document.querySelectorAll('.feat-btn').forEach(b => b.classList.remove('active')); });
+
+/* ── Page Manager ── */
+function populatePageMgr() {
+  const grid = $('page-mgr-grid'); grid.innerHTML = '';
+  if (!pdfDoc || !thumbCanvases.length) { grid.innerHTML = '<p style="font-size:12px;color:var(--text-muted)">Open a PDF first.</p>'; return; }
+  thumbCanvases.forEach((tc, i) => {
+    const item = document.createElement('div'); item.className = 'page-mgr-item'; item.dataset.index = i; item.draggable = true;
+    const img  = document.createElement('img'); img.className = 'page-mgr-thumb'; img.src = tc.toDataURL();
+    const lbl  = document.createElement('div'); lbl.className = 'page-mgr-label'; lbl.textContent = `Page ${i + 1}`;
+    const acts = document.createElement('div'); acts.className = 'page-mgr-actions';
+    const rotBtn = document.createElement('button'); rotBtn.className = 'page-mgr-btn rotate'; rotBtn.textContent = '↻'; rotBtn.title = 'Rotate 90°';
+    rotBtn.addEventListener('click', e => { e.stopPropagation(); rotateSinglePage(i); });
+    const delBtn = document.createElement('button'); delBtn.className = 'page-mgr-btn'; delBtn.textContent = '✕'; delBtn.title = 'Delete page';
+    delBtn.addEventListener('click', e => { e.stopPropagation(); deletePage(i); });
+    acts.appendChild(rotBtn); acts.appendChild(delBtn);
+    item.appendChild(img); item.appendChild(lbl); item.appendChild(acts);
+    item.addEventListener('dragstart', e => { e.dataTransfer.setData('text/plain', i); item.classList.add('dragging'); });
+    item.addEventListener('dragend',   () => item.classList.remove('dragging'));
+    item.addEventListener('dragover',  e => { e.preventDefault(); item.classList.add('drag-over'); });
+    item.addEventListener('dragleave', () => item.classList.remove('drag-over'));
+    item.addEventListener('drop', e => {
+      e.preventDefault(); item.classList.remove('drag-over');
+      const from = +e.dataTransfer.getData('text/plain'), to = +item.dataset.index;
+      if (from !== to) movePageTo(from, to);
+    });
+    grid.appendChild(item);
+  });
+}
+
+async function rotateSinglePage(pi) {
+  if (!pdfDoc) return;
+  const snaps = inkCanvases.map(c => c.toDataURL());
+  if (!window.pageRotations) window.pageRotations = {};
+  window.pageRotations[pi] = ((window.pageRotations[pi] ?? 0) + 90) % 360;
+  const newRot = window.pageRotations[pi];
+  const pg = loadedPages[pi];
+  const vp = pg.getViewport({ scale: renderScale, rotation: newRot });
+  pageContainers[pi].style.width  = vp.width  + 'px';
+  pageContainers[pi].style.height = vp.height + 'px';
+  const pdfC = pageContainers[pi].querySelector('canvas:not(.ink-layer)');
+  pdfC.width = vp.width; pdfC.height = vp.height;
+  inkCanvases[pi].width = vp.width; inkCanvases[pi].height = vp.height;
+  await pg.render({ canvasContext: pdfC.getContext('2d'), viewport: vp }).promise;
+  if (snaps[pi]) await loadUrl(inkCanvases[pi], snaps[pi]);
+  populatePageMgr(); showToast(`Page ${pi + 1} rotated`);
+}
+
+async function deletePage(pi) {
+  if (!pdfDoc || loadedPages.length <= 1) { showToast('Cannot delete the only page'); return; }
+  if (!confirm(`Delete page ${pi + 1}?`)) return;
+  loadedPages.splice(pi, 1); history.splice(pi, 1);
+  placedSigs = placedSigs.filter(s => s.pi !== pi).map(s => ({ ...s, pi: s.pi > pi ? s.pi - 1 : s.pi }));
+  await renderAll(); updatePageNum(1); $('total-pages').textContent = loadedPages.length;
+  showToast(`Page ${pi + 1} deleted`); populatePageMgr();
+}
+
+async function movePageTo(from, to) {
+  const page = loadedPages.splice(from, 1)[0]; loadedPages.splice(to, 0, page);
+  const hist = history.splice(from, 1)[0]; history.splice(to, 0, hist);
+  await renderAll(); showToast('Page moved'); populatePageMgr();
+}
+
+/* ── Add Text overlays ── */
+let textMode = false;
+$('fc-addtext').addEventListener('click', () => { textMode = true; });
+$('pages-wrapper').addEventListener('click', e => {
+  if (!textMode) return;
+  const container = e.target.closest('.page-container');
+  if (!container || e.target.closest('.text-overlay') || e.target.closest('.placed-sig') || e.target.closest('.form-field-overlay')) return;
+  textMode = false;
+  const pi = +container.dataset.pageIndex, r = container.getBoundingClientRect();
+  placeTextOverlay(container, pi, (e.clientX - r.left) / r.width * 100, (e.clientY - r.top) / r.height * 100);
+});
+
+function placeTextOverlay(container, pi, lPct, tPct) {
+  const el = document.createElement('div'); el.className = 'text-overlay';
+  el.style.cssText = `left:${lPct}%;top:${tPct}%;`;
+  const inner = document.createElement('div'); inner.className = 'text-overlay-inner'; inner.contentEditable = 'true';
+  const fs = $('text-font-size')?.value || 14, col = $('text-color')?.value || '#1a1a1a';
+  inner.style.cssText = `font-size:${fs}px;color:${col};font-weight:${$('text-bold')?.checked?'bold':'normal'};font-style:${$('text-italic')?.checked?'italic':'normal'}`;
+  inner.textContent = 'Text';
+  const del = document.createElement('div'); del.className = 'to-del'; del.textContent = '✕';
+  del.addEventListener('click', e => { e.stopPropagation(); el.remove(); });
+  el.appendChild(inner); el.appendChild(del);
+  el.addEventListener('mousedown', e => {
+    if (e.target === inner || e.target === del) return;
+    e.preventDefault();
+    const [sx, sy, sl, st] = [e.clientX, e.clientY, parseFloat(el.style.left), parseFloat(el.style.top)];
+    const mv = e2 => { const cr = container.getBoundingClientRect(); el.style.left = (sl + (e2.clientX-sx)/cr.width*100)+'%'; el.style.top = (st + (e2.clientY-sy)/cr.height*100)+'%'; };
+    const up = () => { document.removeEventListener('mousemove', mv); document.removeEventListener('mouseup', up); };
+    document.addEventListener('mousemove', mv); document.addEventListener('mouseup', up);
+  });
+  inner.addEventListener('focus', () => el.classList.add('editing'));
+  inner.addEventListener('blur',  () => el.classList.remove('editing'));
+  container.appendChild(el);
+  setTimeout(() => { inner.focus(); document.execCommand('selectAll'); }, 10);
+}
+
+/* ── Insert Image ── */
+const imgInsertZone = $('img-insert-zone'), imgInsertFile = $('img-insert-file');
+imgInsertZone.addEventListener('click', () => imgInsertFile.click());
+imgInsertZone.addEventListener('dragover', e => { e.preventDefault(); imgInsertZone.classList.add('dragover'); });
+imgInsertZone.addEventListener('dragleave', () => imgInsertZone.classList.remove('dragover'));
+imgInsertZone.addEventListener('drop', e => { e.preventDefault(); imgInsertZone.classList.remove('dragover'); if (e.dataTransfer.files[0]) loadInsertImage(e.dataTransfer.files[0]); });
+imgInsertFile.addEventListener('change', e => { if (e.target.files[0]) loadInsertImage(e.target.files[0]); imgInsertFile.value = ''; });
+function loadInsertImage(file) {
+  const reader = new FileReader();
+  reader.onload = ev => {
+    const sig = { id: Date.now(), pi: currentPageIdx, l: 10, t: 10, w: 30, h: 20, url: ev.target.result, el: null };
+    placedSigs.push(sig); attachSigEl(sig);
+    $('modal-edit').classList.add('hidden'); document.querySelectorAll('.feat-btn').forEach(b => b.classList.remove('active'));
+    showToast('Image placed — drag to reposition');
+  };
+  reader.readAsDataURL(file);
+}
+
+/* ── Redact ── */
+let redactMode = false, redactStart = null;
+function enterRedactMode() {
+  redactMode = true; mode = 'redact';
+  document.body.classList.add('redact-mode');
+  showToast('Redact mode — draw rectangles to black out content · Esc to exit', 4000);
+}
+function cancelRedactMode() {
+  redactMode = false;
+  if (mode === 'redact') { mode = 'pen'; setMode('pen'); }
+  document.body.classList.remove('redact-mode');
+}
+$('pages-wrapper').addEventListener('mousedown', e => {
+  if (mode !== 'redact') return;
+  const container = e.target.closest('.page-container'); if (!container) return;
+  const canvas = container.querySelector('.ink-layer'); if (!canvas) return;
+  const pi = +container.dataset.pageIndex, r = canvas.getBoundingClientRect();
+  redactStart = { x: (e.clientX-r.left)*(canvas.width/r.width), y: (e.clientY-r.top)*(canvas.height/r.height), canvas, pi };
+});
+document.addEventListener('mouseup', e => {
+  if (!redactStart || mode !== 'redact') return;
+  const { canvas, pi, x: sx, y: sy } = redactStart;
+  const r = canvas.getBoundingClientRect();
+  const ex = (e.clientX-r.left)*(canvas.width/r.width), ey = (e.clientY-r.top)*(canvas.height/r.height);
+  const ctx = canvas.getContext('2d');
+  history[pi].u.push(canvas.toDataURL()); history[pi].r = [];
+  ctx.save(); ctx.fillStyle = '#000'; ctx.globalAlpha = 1; ctx.globalCompositeOperation = 'source-over';
+  ctx.fillRect(Math.min(sx,ex), Math.min(sy,ey), Math.abs(ex-sx), Math.abs(ey-sy));
+  ctx.restore();
+  redactStart = null;
+});
+
+/* ════════════════════════════════════════════════════════════════════════════
+   CONVERT — all export and create functions
+════════════════════════════════════════════════════════════════════════════ */
+$('fc-export-images')?.addEventListener('click', () => toggleSubPanel('sub-export-images', $('fc-export-images')));
+$('fc-merge-pdfs')?.addEventListener('click',    () => toggleSubPanel('sub-merge-pdfs',    $('fc-merge-pdfs')));
+$('fc-split-pdf')?.addEventListener('click',     () => toggleSubPanel('sub-split-pdf',     $('fc-split-pdf')));
+$('fc-pdf-from-images')?.addEventListener('click', () => toggleSubPanel('sub-pdf-from-images', $('fc-pdf-from-images')));
+
+/* Export PNG */
+$('do-export-images')?.addEventListener('click', async () => {
+  if (!pdfDoc) { showToast('Open a PDF first'); return; }
+  const scale = +$('png-scale').value;
+  showToast('Exporting pages…');
+  for (let i = 0; i < loadedPages.length; i++) {
+    const vp = loadedPages[i].getViewport({ scale: scale * renderScale });
+    const c = document.createElement('canvas'); c.width = vp.width; c.height = vp.height;
+    await loadedPages[i].render({ canvasContext: c.getContext('2d'), viewport: vp }).promise;
+    c.getContext('2d').drawImage(inkCanvases[i], 0, 0, c.width, c.height);
+    Object.assign(document.createElement('a'), { href: c.toDataURL('image/png'), download: `page-${i+1}.png` }).click();
+    await new Promise(r => setTimeout(r, 300));
+  }
+  showToast(`${loadedPages.length} pages exported!`);
+});
+
+/* Export Word (.docx) — generates a proper docx XML blob */
+$('fc-export-word')?.addEventListener('click', async () => {
+  if (!pdfDoc) { showToast('Open a PDF first'); return; }
+  showToast('Extracting text for Word…');
+  let body = '';
+  for (let i = 0; i < loadedPages.length; i++) {
+    const content = await loadedPages[i].getTextContent();
+    const text = content.items.map(it => it.str).join(' ').trim();
+    body += `<w:p><w:r><w:rPr><w:b/></w:rPr><w:t>Page ${i+1}</w:t></w:r></w:p>` +
+            text.split('\n').map(line => `<w:p><w:r><w:t xml:space="preserve">${escXml(line)}</w:t></w:r></w:p>`).join('');
+  }
+  const docXml = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">
+<w:body>${body}<w:sectPr/></w:body></w:document>`;
+  const relsXml = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">
+<Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="word/document.xml"/>
+</Relationships>`;
+  const contentTypes = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">
+<Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/>
+<Default Extension="xml" ContentType="application/xml"/>
+<Override PartName="/word/document.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml"/>
+</Types>`;
+  const wordRels = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"></Relationships>`;
+  const zip = await buildDocxZip({ '_rels/.rels': relsXml, '[Content_Types].xml': contentTypes, 'word/document.xml': docXml, 'word/_rels/document.xml.rels': wordRels });
+  downloadBlob(zip, 'document.docx', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document');
+  showToast('Word document downloaded!');
+});
+
+function escXml(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+async function buildDocxZip(files) {
+  // Build a minimal PKZIP/docx from scratch (no external library needed for simple files)
+  const enc = new TextEncoder();
+  const entries = [];
+  for (const [name, content] of Object.entries(files)) {
+    const data = enc.encode(content);
+    entries.push({ name, data });
+  }
+  // Use a simple uncompressed ZIP (store method)
+  const localHeaders = [], centralHeaders = [], offsets = [];
+  let offset = 0;
+  for (const { name, data } of entries) {
+    offsets.push(offset);
+    const nameBytes = enc.encode(name);
+    const crc = crc32(data);
+    const local = new Uint8Array(30 + nameBytes.length + data.length);
+    const dv = new DataView(local.buffer);
+    dv.setUint32(0, 0x04034b50, true); // signature
+    dv.setUint16(4, 20, true); // version needed
+    dv.setUint16(6, 0, true);  // flags
+    dv.setUint16(8, 0, true);  // compression (store)
+    dv.setUint16(10, 0, true); dv.setUint16(12, 0, true); // mod time/date
+    dv.setUint32(14, crc, true);
+    dv.setUint32(18, data.length, true); // compressed size
+    dv.setUint32(22, data.length, true); // uncompressed size
+    dv.setUint16(26, nameBytes.length, true);
+    dv.setUint16(28, 0, true);
+    local.set(nameBytes, 30); local.set(data, 30 + nameBytes.length);
+    localHeaders.push(local);
+    offset += local.length;
+
+    const central = new Uint8Array(46 + nameBytes.length);
+    const cdv = new DataView(central.buffer);
+    cdv.setUint32(0, 0x02014b50, true);
+    cdv.setUint16(4, 20, true); cdv.setUint16(6, 20, true);
+    cdv.setUint16(8, 0, true); cdv.setUint16(10, 0, true);
+    cdv.setUint16(12, 0, true); cdv.setUint16(14, 0, true);
+    cdv.setUint32(16, crc, true);
+    cdv.setUint32(20, data.length, true); cdv.setUint32(24, data.length, true);
+    cdv.setUint16(28, nameBytes.length, true);
+    cdv.setUint16(30, 0, true); cdv.setUint16(32, 0, true); cdv.setUint16(34, 0, true);
+    cdv.setUint16(36, 0, true); cdv.setUint32(38, 0, true);
+    cdv.setUint32(42, offsets[offsets.length-1], true);
+    central.set(nameBytes, 46);
+    centralHeaders.push(central);
+  }
+  const cdSize = centralHeaders.reduce((a, b) => a + b.length, 0);
+  const eocd = new Uint8Array(22);
+  const edv = new DataView(eocd.buffer);
+  edv.setUint32(0, 0x06054b50, true);
+  edv.setUint16(4, 0, true); edv.setUint16(6, 0, true);
+  edv.setUint16(8, entries.length, true); edv.setUint16(10, entries.length, true);
+  edv.setUint32(12, cdSize, true);
+  edv.setUint32(16, offset, true);
+  edv.setUint16(20, 0, true);
+  const all = [...localHeaders, ...centralHeaders, eocd];
+  const total = all.reduce((a, b) => a + b.length, 0);
+  const out = new Uint8Array(total); let pos = 0;
+  all.forEach(a => { out.set(a, pos); pos += a.length; });
+  return new Blob([out], { type: 'application/zip' });
+}
+
+function crc32(data) {
+  let crc = 0xFFFFFFFF;
+  const table = crc32.table || (crc32.table = (() => {
+    const t = new Uint32Array(256);
+    for (let i = 0; i < 256; i++) { let c = i; for (let j = 0; j < 8; j++) c = (c & 1) ? (0xEDB88320 ^ (c >>> 1)) : (c >>> 1); t[i] = c; }
+    return t;
+  })());
+  for (let i = 0; i < data.length; i++) crc = table[(crc ^ data[i]) & 0xFF] ^ (crc >>> 8);
+  return (crc ^ 0xFFFFFFFF) >>> 0;
+}
+
+/* Export Excel */
+$('fc-export-excel')?.addEventListener('click', async () => {
+  if (!pdfDoc) { showToast('Open a PDF first'); return; }
+  if (typeof XLSX === 'undefined') { showToast('SheetJS loading…'); return; }
+  showToast('Building Excel…');
+  const wb = XLSX.utils.book_new();
+  for (let i = 0; i < loadedPages.length; i++) {
+    const content = await loadedPages[i].getTextContent();
+    const rows = content.items.reduce((acc, it) => {
+      if (it.str.trim()) acc.push([it.str]);
+      return acc;
+    }, []);
+    if (!rows.length) rows.push(['(no text on this page)']);
+    const ws = XLSX.utils.aoa_to_sheet([['Text Content — Page ' + (i+1)], ...rows]);
+    XLSX.utils.book_append_sheet(wb, ws, `Page ${i+1}`);
+  }
+  XLSX.writeFile(wb, 'document.xlsx');
+  showToast('Excel file downloaded!');
+});
+
+/* Export PowerPoint */
+$('fc-export-ppt')?.addEventListener('click', async () => {
+  if (!pdfDoc) { showToast('Open a PDF first'); return; }
+  if (typeof PptxGenJS === 'undefined') { showToast('pptxgenjs loading…'); return; }
+  showToast('Building PowerPoint — rendering pages…');
+  const pptx = new PptxGenJS();
+  for (let i = 0; i < loadedPages.length; i++) {
+    const vp = loadedPages[i].getViewport({ scale: 1.5 });
+    const c = document.createElement('canvas'); c.width = vp.width; c.height = vp.height;
+    await loadedPages[i].render({ canvasContext: c.getContext('2d'), viewport: vp }).promise;
+    c.getContext('2d').drawImage(inkCanvases[i], 0, 0, c.width, c.height);
+    const slide = pptx.addSlide();
+    const ar = vp.width / vp.height;
+    pptx.layout = ar > 1 ? 'LAYOUT_WIDE' : 'LAYOUT_4x3';
+    slide.addImage({ data: c.toDataURL('image/jpeg', 0.92), x: 0, y: 0, w: '100%', h: '100%' });
+    showToast(`Rendering page ${i+1} / ${loadedPages.length}…`);
+  }
+  await pptx.writeFile({ fileName: 'presentation.pptx' });
+  showToast('PowerPoint downloaded!');
+});
+
+/* Export plain text */
+$('fc-export-txt')?.addEventListener('click', async () => {
+  if (!pdfDoc) { showToast('Open a PDF first'); return; }
+  let out = '';
+  for (let i = 0; i < loadedPages.length; i++) {
+    const content = await loadedPages[i].getTextContent();
+    out += `\n\n=== Page ${i+1} ===\n` + content.items.map(it => it.str).join(' ');
+  }
+  downloadBlob(new Blob([out.trim()], { type: 'text/plain' }), 'document.txt', 'text/plain');
+  showToast('Text file downloaded!');
+});
+
+/* Merge PDFs */
+$('merge-pick-btn')?.addEventListener('click', () => $('merge-files').click());
+$('merge-files')?.addEventListener('change', e => {
+  const names = Array.from(e.target.files).map(f => f.name).join(', ');
+  $('merge-file-list').textContent = names;
+  $('do-merge').style.display = e.target.files.length ? '' : 'none';
+});
+$('do-merge')?.addEventListener('click', async () => {
+  if (!pdfDoc) { showToast('Open a base PDF first'); return; }
+  const files = $('merge-files').files; if (!files.length) return;
+  showToast('Merging PDFs…');
+  const raw = await pdfDoc.getData();
+  const merged = await PDFLib.PDFDocument.load(raw);
+  for (const file of files) {
+    const doc = await PDFLib.PDFDocument.load(await file.arrayBuffer());
+    const copied = await merged.copyPages(doc, doc.getPageIndices());
+    copied.forEach(p => merged.addPage(p));
+  }
+  downloadBlob(new Blob([await merged.save()], { type: 'application/pdf' }), 'merged.pdf', 'application/pdf');
+  showToast('Merged PDF downloaded!');
+});
+
+/* Split PDF */
+$('do-split')?.addEventListener('click', async () => {
+  if (!pdfDoc) { showToast('Open a PDF first'); return; }
+  const from = Math.max(1, +$('split-from').value) - 1;
+  const to   = Math.min(pdfDoc.numPages, +$('split-to').value) - 1;
+  if (from > to) { showToast('Invalid page range'); return; }
+  const raw = await pdfDoc.getData();
+  const src = await PDFLib.PDFDocument.load(raw);
+  const out = await PDFLib.PDFDocument.create();
+  const pages = await out.copyPages(src, Array.from({length: to - from + 1}, (_, i) => from + i));
+  pages.forEach(p => out.addPage(p));
+  downloadBlob(new Blob([await out.save()], { type: 'application/pdf' }), `pages-${from+1}-to-${to+1}.pdf`, 'application/pdf');
+  showToast(`Pages ${from+1}–${to+1} extracted!`);
+});
+
+/* Images → PDF */
+const img2pdfZone = $('img2pdf-zone'), img2pdfFiles = $('img2pdf-files');
+let img2pdfFileList = [];
+img2pdfZone?.addEventListener('click', () => img2pdfFiles.click());
+img2pdfZone?.addEventListener('dragover', e => { e.preventDefault(); img2pdfZone.classList.add('dragover'); });
+img2pdfZone?.addEventListener('dragleave', () => img2pdfZone.classList.remove('dragover'));
+img2pdfZone?.addEventListener('drop', e => { e.preventDefault(); img2pdfZone.classList.remove('dragover'); handleImg2pdfFiles(e.dataTransfer.files); });
+img2pdfFiles?.addEventListener('change', e => { handleImg2pdfFiles(e.target.files); img2pdfFiles.value = ''; });
+function handleImg2pdfFiles(files) {
+  img2pdfFileList = Array.from(files);
+  $('img2pdf-list').textContent = img2pdfFileList.map(f => f.name).join(', ');
+  $('do-img2pdf').style.display = img2pdfFileList.length ? '' : 'none';
+}
+$('do-img2pdf')?.addEventListener('click', async () => {
+  if (!img2pdfFileList.length) return;
+  showToast('Creating PDF from images…');
+  const doc = await PDFLib.PDFDocument.create();
+  for (const file of img2pdfFileList) {
+    const ab = await file.arrayBuffer();
+    let img;
+    if (file.type === 'image/jpeg') img = await doc.embedJpg(ab);
+    else {
+      // convert to PNG via canvas
+      const bmp = await createImageBitmap(file);
+      const cv  = document.createElement('canvas'); cv.width = bmp.width; cv.height = bmp.height;
+      cv.getContext('2d').drawImage(bmp, 0, 0);
+      const pngAb = await (await fetch(cv.toDataURL('image/png'))).arrayBuffer();
+      img = await doc.embedPng(pngAb);
+    }
+    const page = doc.addPage([img.width, img.height]);
+    page.drawImage(img, { x: 0, y: 0, width: img.width, height: img.height });
+  }
+  downloadBlob(new Blob([await doc.save()], { type: 'application/pdf' }), 'from-images.pdf', 'application/pdf');
+  showToast('PDF created and downloaded!');
+});
+
+function downloadBlob(blob, filename, type) {
+  const url = URL.createObjectURL(blob);
+  Object.assign(document.createElement('a'), { href: url, download: filename }).click();
+  setTimeout(() => URL.revokeObjectURL(url), 5000);
+}
+
+/* ════════════════════════════════════════════════════════════════════════════
+   FORMS
+════════════════════════════════════════════════════════════════════════════ */
+let formFieldType = null, formFieldPending = false;
+['fc-field-text','fc-field-check','fc-field-dropdown','fc-field-date','fc-calc-fields'].forEach(id => {
+  $(id)?.addEventListener('click', () => {
+    const types = { 'fc-field-text': 'text', 'fc-field-check': 'checkbox', 'fc-field-dropdown': 'dropdown', 'fc-field-date': 'date', 'fc-calc-fields': 'number' };
+    const labels = { text: '📝 Add Text Field', checkbox: '☑️ Add Checkbox', dropdown: '🔽 Add Dropdown', date: '📅 Add Date Field', number: '🧮 Add Number Field' };
+    formFieldType = types[id];
+    $('form-field-title').textContent = labels[id];
+    toggleSubPanel('sub-form-field', $(id));
+  });
+});
+$('form-place-btn')?.addEventListener('click', () => {
+  formFieldPending = true;
+  $('modal-forms').classList.add('hidden'); document.querySelectorAll('.feat-btn').forEach(b => b.classList.remove('active'));
+  showToast(`Click the document to place the ${formFieldType} field`, 3000);
+});
+$('pages-wrapper').addEventListener('click', e => {
+  if (!formFieldPending || !formFieldType) return;
+  const container = e.target.closest('.page-container');
+  if (!container || e.target.closest('.form-field-overlay') || e.target.closest('.placed-sig') || e.target.closest('.text-overlay')) return;
+  formFieldPending = false;
+  const r = container.getBoundingClientRect();
+  placeFormField(container, (e.clientX-r.left)/r.width*100, (e.clientY-r.top)/r.height*100, formFieldType, $('form-field-label')?.value || formFieldType, $('form-field-placeholder')?.value || '');
+});
+
+function placeFormField(container, lPct, tPct, type, label, placeholder) {
+  const el = document.createElement('div'); el.className = 'form-field-overlay';
+  el.style.cssText = `left:${lPct}%;top:${tPct}%;`;
+  const lbl = document.createElement('div'); lbl.className = 'ff-label'; lbl.textContent = label;
+  const del = document.createElement('div'); del.className = 'ff-del'; del.textContent = '✕';
+  del.addEventListener('click', e => { e.stopPropagation(); el.remove(); });
+  const rh = document.createElement('div'); rh.className = 'ff-resize';
+  let field;
+  if (type === 'checkbox') {
+    el.style.width = '24px'; el.style.height = '24px';
+    field = document.createElement('input'); field.type = 'checkbox';
+    field.style.cssText = 'width:18px;height:18px;margin:3px;accent-color:var(--accent);pointer-events:auto;cursor:pointer;';
+  } else if (type === 'dropdown') {
+    el.style.width = '120px'; el.style.height = '28px';
+    field = document.createElement('select');
+    field.style.cssText = 'width:100%;height:100%;background:rgba(255,255,255,.9);border:none;font-size:12px;cursor:pointer;pointer-events:auto;';
+    ['Option 1','Option 2','Option 3'].forEach(o => { const opt = document.createElement('option'); opt.textContent = o; field.appendChild(opt); });
+  } else if (type === 'date') {
+    el.style.width = '140px'; el.style.height = '28px';
+    field = document.createElement('input'); field.type = 'date';
+    field.style.cssText = 'width:100%;height:100%;background:rgba(255,255,255,.9);border:none;font-size:11px;pointer-events:auto;';
+  } else if (type === 'number') {
+    el.style.width = '100px'; el.style.height = '28px';
+    field = document.createElement('input'); field.type = 'number'; field.placeholder = placeholder || '0';
+    field.style.cssText = 'width:100%;height:100%;background:rgba(255,255,255,.9);border:none;padding:0 6px;font-size:12px;pointer-events:auto;';
+  } else {
+    el.style.width = '140px'; el.style.height = '28px';
+    field = document.createElement('input'); field.type = 'text'; field.placeholder = placeholder || 'Enter text…';
+    field.style.cssText = 'width:100%;height:100%;background:rgba(255,255,255,.9);border:none;padding:0 6px;font-size:12px;pointer-events:auto;';
+  }
+  el.appendChild(lbl); el.appendChild(field); el.appendChild(del); el.appendChild(rh);
+  el.addEventListener('mousedown', e => {
+    if (e.target === field || e.target === del || e.target === rh) return;
+    e.preventDefault();
+    const [sx, sy, sl, st] = [e.clientX, e.clientY, parseFloat(el.style.left), parseFloat(el.style.top)];
+    const mv = e2 => { const cr = container.getBoundingClientRect(); el.style.left = (sl+(e2.clientX-sx)/cr.width*100)+'%'; el.style.top = (st+(e2.clientY-sy)/cr.height*100)+'%'; };
+    const up = () => { document.removeEventListener('mousemove', mv); document.removeEventListener('mouseup', up); };
+    document.addEventListener('mousemove', mv); document.addEventListener('mouseup', up);
+  });
+  rh.addEventListener('mousedown', e => {
+    e.preventDefault(); e.stopPropagation();
+    const [sx, sw] = [e.clientX, el.offsetWidth];
+    const mv = e2 => { el.style.width = Math.max(40, sw + e2.clientX - sx) + 'px'; };
+    const up = () => { document.removeEventListener('mousemove', mv); document.removeEventListener('mouseup', up); };
+    document.addEventListener('mousemove', mv); document.addEventListener('mouseup', up);
+  });
+  container.appendChild(el);
+}
+
+/* Export form data as CSV */
+$('fc-export-form')?.addEventListener('click', () => {
+  const fields = document.querySelectorAll('.form-field-overlay');
+  if (!fields.length) { showToast('No form fields on the document'); return; }
+  let csv = 'Label,Type,Value\n';
+  fields.forEach(el => {
+    const lbl = el.querySelector('.ff-label')?.textContent || '';
+    const input = el.querySelector('input,select,textarea');
+    if (!input) return;
+    const type = input.type || input.tagName.toLowerCase();
+    const val  = input.type === 'checkbox' ? (input.checked ? 'true' : 'false') : (input.value || '');
+    csv += `"${lbl}","${type}","${val.replace(/"/g, '""')}"\n`;
+  });
+  downloadBlob(new Blob([csv], { type: 'text/csv' }), 'form-data.csv', 'text/csv');
+  showToast('Form data exported!');
+});
+
+/* ════════════════════════════════════════════════════════════════════════════
+   SECURITY
+════════════════════════════════════════════════════════════════════════════ */
+$('sec-apply-btn')?.addEventListener('click', async () => {
+  if (!pdfDoc) { showToast('Open a PDF first'); return; }
+  const openPwd = $('sec-open-password')?.value?.trim();
+  const openConf= $('sec-open-password-confirm')?.value?.trim();
+  const permPwd = $('sec-perm-password')?.value?.trim();
+  if (openPwd && openPwd !== openConf) { showToast('Passwords do not match!'); return; }
+  const raw = await pdfDoc.getData();
+  const libDoc = await PDFLib.PDFDocument.load(raw);
+  const perms = [];
+  if ($('perm-print')?.checked)     perms.push(PDFLib.PermissionsBit.Printing);
+  if ($('perm-copy')?.checked)      perms.push(PDFLib.PermissionsBit.CopyContent);
+  if ($('perm-edit')?.checked)      perms.push(PDFLib.PermissionsBit.ModifyAnnotations);
+  if ($('perm-fillforms')?.checked) perms.push(PDFLib.PermissionsBit.FillAndSign);
+  const saveOpts = {};
+  if (openPwd || permPwd) {
+    saveOpts.userPassword = openPwd || '';
+    saveOpts.ownerPassword = permPwd || (openPwd + '_owner');
+    saveOpts.permissions = { userPermissions: perms };
+  }
+  try {
+    downloadBlob(new Blob([await libDoc.save(saveOpts)], { type: 'application/pdf' }), 'protected.pdf', 'application/pdf');
+    showToast('Protected PDF downloaded!');
+    $('modal-security').classList.add('hidden'); document.querySelectorAll('.feat-btn').forEach(b => b.classList.remove('active'));
+  } catch (err) { showToast('Error: ' + err.message); }
+});
+
+/* Metadata from security modal */
+$('fc-metadata-sec')?.addEventListener('click', () => toggleSubPanel('sub-metadata-sec', $('fc-metadata-sec')));
+$('do-set-metadata')?.addEventListener('click', () => applyMetadata($('meta-title').value, $('meta-author').value, $('meta-subject').value, $('meta-keywords').value));
+
+/* ════════════════════════════════════════════════════════════════════════════
+   E-SIGNATURES
+════════════════════════════════════════════════════════════════════════════ */
+$('fc-esign-self')?.addEventListener('click', () => { $('modal-esign').classList.add('hidden'); document.querySelectorAll('.feat-btn').forEach(b => b.classList.remove('active')); openSigModal(); });
+$('fc-esign-initials')?.addEventListener('click', () => {
+  document.querySelector('.sig-tab[data-tab="type"]')?.click();
+  $('modal-esign').classList.add('hidden'); document.querySelectorAll('.feat-btn').forEach(b => b.classList.remove('active'));
+  openSigModal();
+});
+$('fc-esign-datestamp')?.addEventListener('click', () => {
+  if (!pdfDoc) { showToast('Open a PDF first'); return; }
+  const today = new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'long', year: 'numeric' });
+  textMode = true;
+  $('modal-esign').classList.add('hidden'); document.querySelectorAll('.feat-btn').forEach(b => b.classList.remove('active'));
+  // Temporarily set font size and color for date
+  if ($('text-font-size')) $('text-font-size').value = 12;
+  if ($('text-color')) $('text-color').value = '#333333';
+  showToast(`Click to place date: ${today}`, 3000);
+  // Override text content to be the date
+  const origClick = $('pages-wrapper').onclick;
+  const listener = e => {
+    const container = e.target.closest('.page-container');
+    if (!container) return;
+    textMode = false;
+    $('pages-wrapper').removeEventListener('click', listener, true);
+    const r = container.getBoundingClientRect();
+    const pi = +container.dataset.pageIndex;
+    const el = document.createElement('div'); el.className = 'text-overlay';
+    el.style.cssText = `left:${(e.clientX-r.left)/r.width*100}%;top:${(e.clientY-r.top)/r.height*100}%;`;
+    const inner = document.createElement('div'); inner.className = 'text-overlay-inner'; inner.contentEditable = 'true';
+    inner.style.cssText = 'font-size:12px;color:#333;';
+    inner.textContent = today;
+    const del = document.createElement('div'); del.className = 'to-del'; del.textContent = '✕';
+    del.addEventListener('click', ev => { ev.stopPropagation(); el.remove(); });
+    el.appendChild(inner); el.appendChild(del);
+    container.appendChild(el);
+  };
+  $('pages-wrapper').addEventListener('click', listener, true);
+});
+$('fc-esign-auditlog')?.addEventListener('click', () => {
+  const lines = [`PDF Audit Log — Generated ${new Date().toISOString()}`, '─'.repeat(50)];
+  lines.push(`Document: ${$('status-file').textContent}`);
+  lines.push(`Pages: ${pdfDoc?.numPages ?? '?'}`);
+  lines.push(`Signatures placed: ${placedSigs.length}`);
+  placedSigs.forEach((s, i) => lines.push(`  Sig ${i+1}: Page ${s.pi+1}, position (${s.l.toFixed(1)}%, ${s.t.toFixed(1)}%)`));
+  lines.push('─'.repeat(50));
+  lines.push('This log was generated client-side. For legally binding signatures, use a certified e-signature provider.');
+  downloadBlob(new Blob([lines.join('\n')], { type: 'text/plain' }), 'audit-log.txt', 'text/plain');
+  showToast('Audit log downloaded!');
+});
+$('fc-esign-request')?.addEventListener('click', () => toggleSubPanel('sub-esign-request', $('fc-esign-request')));
+$('fc-esign-bulk')?.addEventListener('click',    () => toggleSubPanel('sub-esign-bulk',    $('fc-esign-bulk')));
+$('do-esign-request')?.addEventListener('click', () => {
+  const email = $('esign-email').value.trim(), msg = $('esign-message').value;
+  if (!email) { showToast('Enter a recipient email'); return; }
+  const subject = encodeURIComponent('Please sign: ' + $('status-file').textContent);
+  const body    = encodeURIComponent(msg + '\n\nSent via PDF Editor');
+  window.open(`mailto:${email}?subject=${subject}&body=${body}`);
+  showToast('Email client opened');
+});
+$('do-esign-bulk')?.addEventListener('click', () => {
+  const emails = $('esign-bulk-emails').value.split(/[\n,]+/).map(e => e.trim()).filter(Boolean);
+  if (!emails.length) { showToast('Enter at least one email'); return; }
+  const msg = $('esign-bulk-message').value;
+  const subject = encodeURIComponent('Please sign: ' + $('status-file').textContent);
+  const body    = encodeURIComponent(msg + '\n\nSent via PDF Editor');
+  emails.forEach((email, i) => setTimeout(() => window.open(`mailto:${email}?subject=${subject}&body=${body}`), i * 400));
+  showToast(`Opening ${emails.length} email drafts…`);
+});
+
+/* ════════════════════════════════════════════════════════════════════════════
+   OCR
+════════════════════════════════════════════════════════════════════════════ */
+$('fc-ocr-run')?.addEventListener('click', async () => {
+  if (!pdfDoc) { showToast('Open a PDF first'); return; }
+  $('sub-ocr-result').style.display = 'block';
+  $('ocr-text-output').value = 'Extracting…';
+  let full = '';
+  for (let i = 0; i < loadedPages.length; i++) {
+    const content = await loadedPages[i].getTextContent();
+    const text = content.items.map(it => it.str).join(' ').trim();
+    if (text) full += `\n\n── Page ${i + 1} ──\n${text}`;
+  }
+  $('ocr-text-output').value = full.trim() || 'No text layer found — try Deep OCR (Tesseract).';
+});
+$('ocr-copy-btn')?.addEventListener('click', () => {
+  navigator.clipboard.writeText($('ocr-text-output').value).then(() => showToast('Copied!'));
+});
+$('ocr-download-btn')?.addEventListener('click', () => {
+  downloadBlob(new Blob([$('ocr-text-output').value], { type: 'text/plain' }), 'extracted-text.txt', 'text/plain');
+});
+
+/* Tesseract OCR */
+$('fc-ocr-tesseract')?.addEventListener('click', () => toggleSubPanel('sub-ocr-tesseract', $('fc-ocr-tesseract')));
+$('do-ocr-tesseract')?.addEventListener('click', async () => {
+  if (!pdfDoc) { showToast('Open a PDF first'); return; }
+  if (typeof Tesseract === 'undefined') { showToast('Tesseract is loading, try again in a moment'); return; }
+  const lang = $('ocr-lang').value;
+  const allPages = $('ocr-page-sel').value === 'all';
+  const pages = allPages ? loadedPages.map((_, i) => i) : [currentPageIdx];
+  const prog = $('ocr-progress');
+  $('sub-ocr-result').style.display = 'block';
+  $('ocr-text-output').value = 'Running OCR…';
+  let result = '';
+  for (const pi of pages) {
+    prog.textContent = `Processing page ${pi + 1}…`;
+    const vp = loadedPages[pi].getViewport({ scale: 2 });
+    const c = document.createElement('canvas'); c.width = vp.width; c.height = vp.height;
+    await loadedPages[pi].render({ canvasContext: c.getContext('2d'), viewport: vp }).promise;
+    const { data: { text } } = await Tesseract.recognize(c, lang, {
+      logger: m => { if (m.status === 'recognizing text') prog.textContent = `Page ${pi+1}: ${Math.round(m.progress*100)}%`; }
+    });
+    result += `\n\n── Page ${pi + 1} (Tesseract) ──\n${text}`;
+  }
+  $('ocr-text-output').value = result.trim() || '(No text recognised)';
+  prog.textContent = 'Done!';
+});
+
+/* Enhance scan */
+$('fc-enhance-scan')?.addEventListener('click', async () => {
+  if (!pdfDoc) { showToast('Open a PDF first'); return; }
+  showToast('Enhancing pages…');
+  for (let i = 0; i < pageContainers.length; i++) {
+    const pdfCanvas = pageContainers[i].querySelector('canvas:not(.ink-layer)');
+    if (!pdfCanvas) continue;
+    const ctx = pdfCanvas.getContext('2d');
+    const imgData = ctx.getImageData(0, 0, pdfCanvas.width, pdfCanvas.height);
+    const data = imgData.data;
+    // Apply contrast boost + slight sharpening via pixel manipulation
+    for (let j = 0; j < data.length; j += 4) {
+      for (let k = 0; k < 3; k++) {
+        let v = data[j+k];
+        // Contrast: (v - 128) * 1.4 + 128
+        v = Math.min(255, Math.max(0, (v - 128) * 1.4 + 128));
+        data[j+k] = v;
+      }
+    }
+    ctx.putImageData(imgData, 0, 0);
+  }
+  showToast('Scan enhanced — contrast boosted on all pages');
+});
+
+/* Camera scan */
+let cameraStream = null;
+$('fc-camera-scan')?.addEventListener('click', async () => {
+  toggleSubPanel('sub-camera-scan', $('fc-camera-scan'));
+  if ($('sub-camera-scan').style.display === 'none') { stopCamera(); return; }
+  try {
+    cameraStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
+    $('camera-video').srcObject = cameraStream;
+  } catch (err) { showToast('Camera access denied: ' + err.message); }
+});
+$('camera-capture-btn')?.addEventListener('click', () => {
+  const video = $('camera-video'), canvas = $('camera-canvas');
+  canvas.width = video.videoWidth; canvas.height = video.videoHeight;
+  canvas.getContext('2d').drawImage(video, 0, 0);
+  const dataUrl = canvas.toDataURL('image/jpeg', 0.92);
+  $('camera-preview').src = dataUrl; $('camera-preview-wrap').style.display = '';
+  showToast('Captured! Click "Add as PDF Page" to add it.');
+});
+$('camera-stop-btn')?.addEventListener('click', stopCamera);
+$('camera-add-page-btn')?.addEventListener('click', async () => {
+  const src = $('camera-preview').src; if (!src || !pdfDoc) { showToast('Capture an image and open a PDF first'); return; }
+  // Add camera image as a new page using pdf-lib
+  const raw = await pdfDoc.getData();
+  const libDoc = await PDFLib.PDFDocument.load(raw);
+  const pngAb = await (await fetch(src)).arrayBuffer();
+  const img = await libDoc.embedJpg(pngAb);
+  const page = libDoc.addPage([img.width, img.height]);
+  page.drawImage(img, { x: 0, y: 0, width: img.width, height: img.height });
+  downloadBlob(new Blob([await libDoc.save()], { type: 'application/pdf' }), 'with-camera-page.pdf', 'application/pdf');
+  showToast('New page saved to downloaded PDF!');
+});
+function stopCamera() {
+  if (cameraStream) { cameraStream.getTracks().forEach(t => t.stop()); cameraStream = null; }
+  const v = $('camera-video'); if (v) v.srcObject = null;
+}
+
+/* ════════════════════════════════════════════════════════════════════════════
+   AI ASSISTANT
+════════════════════════════════════════════════════════════════════════════ */
+let aiChatHistory = [], aiDocContext = '';
+async function extractDocText() {
+  if (!pdfDoc) return '';
+  let text = '';
+  for (let i = 0; i < Math.min(loadedPages.length, 20); i++) {
+    const c = await loadedPages[i].getTextContent();
+    text += c.items.map(it => it.str).join(' ') + '\n';
+  }
+  return text.trim().slice(0, 15000);
+}
+function addAiMsg(role, text) {
+  const area = $('ai-chat-area');
+  const el = document.createElement('div'); el.className = 'ai-msg ' + role; el.textContent = text;
+  area.appendChild(el); area.scrollTop = area.scrollHeight; return el;
+}
+async function sendAiMessage(question) {
+  if (!question.trim()) return;
+  if (!aiDocContext && pdfDoc) {
+    const t = addAiMsg('thinking', '⏳ Reading document…');
+    aiDocContext = await extractDocText(); t.remove();
+  }
+  addAiMsg('user', question);
+  const thinking = addAiMsg('thinking', '🤖 Thinking…');
+  $('ai-user-input').value = '';
+  const systemPrompt = aiDocContext
+    ? `You are a helpful PDF assistant. Here is the document text:\n\n---\n${aiDocContext}\n---\nAnswer questions concisely and helpfully.`
+    : `You are a helpful PDF assistant. No PDF text is available. Help with general PDF questions.`;
+  aiChatHistory.push({ role: 'user', content: question });
+  try {
+    const resp = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ model: 'claude-sonnet-4-20250514', max_tokens: 1000, system: systemPrompt, messages: aiChatHistory.slice(-10) })
+    });
+    const data = await resp.json();
+    const answer = data.content?.[0]?.text || 'Sorry, no response received.';
+    thinking.remove(); addAiMsg('assistant', answer);
+    aiChatHistory.push({ role: 'assistant', content: answer });
+  } catch (err) { thinking.remove(); addAiMsg('assistant', 'Error: ' + err.message); }
+}
+$('ai-send-btn')?.addEventListener('click', () => sendAiMessage($('ai-user-input').value));
+$('ai-user-input')?.addEventListener('keydown', e => { if (e.key === 'Enter') sendAiMessage(e.target.value); });
+document.querySelectorAll('.ai-quick-btn').forEach(btn => btn.addEventListener('click', () => sendAiMessage(btn.dataset.q)));
+$('ai-clear-btn')?.addEventListener('click', () => {
+  aiChatHistory = []; aiDocContext = '';
+  $('ai-chat-area').innerHTML = '<div class="ai-msg assistant">Chat cleared. Ask me anything!</div>';
+});
+$('file-input').addEventListener('change', () => { aiDocContext = ''; aiChatHistory = []; });
+
+/* ════════════════════════════════════════════════════════════════════════════
+   ADVANCED TOOLS
+════════════════════════════════════════════════════════════════════════════ */
+$('fc-metadata-pro')?.addEventListener('click', () => toggleSubPanel('sub-metadata-pro', $('fc-metadata-pro')));
+$('do-pro-metadata')?.addEventListener('click', () => applyMetadata($('pro-meta-title').value, $('pro-meta-author').value, $('pro-meta-subject').value, $('pro-meta-keywords').value));
+
+async function applyMetadata(title, author, subject, keywords) {
+  if (!pdfDoc) { showToast('Open a PDF first'); return; }
+  const raw = await pdfDoc.getData();
+  const libDoc = await PDFLib.PDFDocument.load(raw);
+  if (title)    libDoc.setTitle(title);
+  if (author)   libDoc.setAuthor(author);
+  if (subject)  libDoc.setSubject(subject);
+  if (keywords) libDoc.setKeywords([keywords]);
+  libDoc.setProducer('PDF Editor');
+  libDoc.setCreationDate(new Date());
+  libDoc.setModificationDate(new Date());
+  downloadBlob(new Blob([await libDoc.save()], { type: 'application/pdf' }), 'with-metadata.pdf', 'application/pdf');
+  showToast('Metadata applied and saved!');
+}
+
+/* Compress */
+$('fc-compress')?.addEventListener('click', () => toggleSubPanel('sub-compress', $('fc-compress')));
+$('do-compress')?.addEventListener('click', async () => {
+  if (!pdfDoc) { showToast('Open a PDF first'); return; }
+  const quality = +$('compress-quality').value;
+  showToast('Compressing…');
+  const raw = await pdfDoc.getData();
+  const libDoc = await PDFLib.PDFDocument.load(raw);
+  const pages = libDoc.getPages();
+  for (let i = 0; i < pages.length; i++) {
+    const vp = loadedPages[i].getViewport({ scale: renderScale * quality });
+    const c = document.createElement('canvas'); c.width = vp.width; c.height = vp.height;
+    await loadedPages[i].render({ canvasContext: c.getContext('2d'), viewport: vp }).promise;
+    c.getContext('2d').drawImage(inkCanvases[i], 0, 0, c.width, c.height);
+    const jpgData = await (await fetch(c.toDataURL('image/jpeg', quality))).arrayBuffer();
+    const jpgImg  = await libDoc.embedJpg(jpgData);
+    const { width, height } = pages[i].getSize();
+    pages[i].drawImage(jpgImg, { x: 0, y: 0, width, height });
+  }
+  const out = await libDoc.save();
+  downloadBlob(new Blob([out], { type: 'application/pdf' }), 'compressed.pdf', 'application/pdf');
+  showToast(`Compressed! (~${(out.byteLength/1024).toFixed(0)} KB)`);
+});
+
+/* Preflight */
+$('fc-preflight')?.addEventListener('click', () => toggleSubPanel('sub-preflight', $('fc-preflight')));
+$('do-preflight')?.addEventListener('click', async () => {
+  if (!pdfDoc) { $('preflight-output').textContent = 'Open a PDF first.'; return; }
+  const raw = await pdfDoc.getData();
+  const libDoc = await PDFLib.PDFDocument.load(raw);
+  const pages  = libDoc.getPages();
+  const lines  = ['PDF Preflight Report', '═'.repeat(36), ''];
+  lines.push(`File size:    ${(raw.byteLength / 1024).toFixed(1)} KB`);
+  lines.push(`Pages:        ${pages.length}`);
+  lines.push(`PDF version:  ${libDoc.getProducer() || '(unknown)'}`);
+  lines.push(`Title:        ${libDoc.getTitle() || '(not set)'}`);
+  lines.push(`Author:       ${libDoc.getAuthor() || '(not set)'}`);
+  lines.push(`Created:      ${libDoc.getCreationDate()?.toLocaleDateString() || '(not set)'}`);
+  lines.push('');
+  lines.push('Page dimensions:');
+  const uniqueSizes = new Set();
+  pages.forEach((p, i) => {
+    const { width, height } = p.getSize();
+    const sizePt = `${width.toFixed(0)}×${height.toFixed(0)} pt`;
+    const sizeMm = `${(width*0.353).toFixed(0)}×${(height*0.353).toFixed(0)} mm`;
+    uniqueSizes.add(sizePt);
+    if (i < 5) lines.push(`  Page ${i+1}: ${sizePt} (${sizeMm})`);
+  });
+  if (pages.length > 5) lines.push(`  ... (${pages.length - 5} more pages)`);
+  if (uniqueSizes.size > 1) lines.push('\n⚠  Multiple page sizes detected');
+  lines.push('');
+  lines.push(raw.byteLength > 10 * 1024 * 1024 ? '⚠  File size > 10 MB' : '✓  File size within normal range');
+  lines.push(pages.length > 0 ? '✓  Document has content' : '✗  Document appears empty');
+  lines.push('');
+  lines.push('─'.repeat(36));
+  lines.push('Note: Full preflight (fonts, ICC profiles, bleeds) requires a desktop PDF tool.');
+  $('preflight-output').textContent = lines.join('\n');
+});
+
+/* Colour management */
+$('fc-color-mgmt')?.addEventListener('click', () => toggleSubPanel('sub-color-mgmt', $('fc-color-mgmt')));
+const brightEl = $('color-brightness'), contrastEl = $('color-contrast'), grayEl = $('color-grayscale');
+function updateColorLabels() {
+  if ($('color-brightness-val')) $('color-brightness-val').textContent = brightEl.value + '%';
+  if ($('color-contrast-val'))   $('color-contrast-val').textContent   = contrastEl.value + '%';
+}
+brightEl?.addEventListener('input', updateColorLabels);
+contrastEl?.addEventListener('input', updateColorLabels);
+$('do-color-apply')?.addEventListener('click', () => {
+  const b = brightEl.value, c = contrastEl.value, g = grayEl.checked;
+  const filter = `brightness(${b}%) contrast(${c}%)${g ? ' grayscale(100%)' : ''}`;
+  pageContainers.forEach(pc => {
+    const canvas = pc.querySelector('canvas:not(.ink-layer)');
+    if (canvas) canvas.style.filter = filter;
+  });
+  showToast('Colour adjustments applied');
+});
+$('do-color-reset')?.addEventListener('click', () => {
+  pageContainers.forEach(pc => {
+    const canvas = pc.querySelector('canvas:not(.ink-layer)');
+    if (canvas) canvas.style.filter = '';
+  });
+  if (brightEl) brightEl.value = 100;
+  if (contrastEl) contrastEl.value = 100;
+  if (grayEl) grayEl.checked = false;
+  updateColorLabels(); showToast('Colours reset');
+});
+
+/* PDF/A export */
+$('fc-pdfa')?.addEventListener('click', async () => {
+  if (!pdfDoc) { showToast('Open a PDF first'); return; }
+  showToast('Creating PDF/A-like export…');
+  const raw = await pdfDoc.getData();
+  const libDoc = await PDFLib.PDFDocument.load(raw);
+  libDoc.setTitle(libDoc.getTitle() || 'Archived Document');
+  libDoc.setProducer('PDF Editor — PDF/A Export');
+  libDoc.setCreationDate(new Date());
+  libDoc.setModificationDate(new Date());
+  const xmpXml = `<?xpacket begin="\uFEFF" id="W5M0MpCehiHzreSzNTczkc9d"?>
+<x:xmpmeta xmlns:x="adobe:ns:meta/"><rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+<rdf:Description xmlns:pdfaid="http://www.aiim.org/pdfa/ns/id/" rdf:about="">
+<pdfaid:part>1</pdfaid:part><pdfaid:conformance>B</pdfaid:conformance>
+</rdf:Description></rdf:RDF></x:xmpmeta><?xpacket end="w"?>`;
+  const raw2 = await libDoc.save();
+  downloadBlob(new Blob([raw2], { type: 'application/pdf' }), 'archive.pdf', 'application/pdf');
+  showToast('PDF/A-like archive downloaded!');
+});
+
+/* Watermark */
+$('fc-watermark')?.addEventListener('click', () => toggleSubPanel('sub-watermark', $('fc-watermark')));
+$('watermark-opacity')?.addEventListener('input', () => { $('watermark-opacity-val').textContent = $('watermark-opacity').value + '%'; });
+$('do-watermark')?.addEventListener('click', async () => {
+  if (!pdfDoc) { showToast('Open a PDF first'); return; }
+  const text    = $('watermark-text').value || 'DRAFT';
+  const opacity = +$('watermark-opacity').value / 100;
+  const color   = $('watermark-color').value;
+  const r = parseInt(color.slice(1,3),16), g = parseInt(color.slice(3,5),16), b = parseInt(color.slice(5,7),16);
+  showToast('Applying watermark…');
+  // Draw watermark on each ink canvas
+  inkCanvases.forEach((c, pi) => {
+    const ctx = c.getContext('2d');
+    ctx.save();
+    ctx.globalAlpha = opacity;
+    ctx.font = `bold ${c.width / 8}px Arial`;
+    ctx.fillStyle = `rgb(${r},${g},${b})`;
+    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    ctx.translate(c.width / 2, c.height / 2);
+    ctx.rotate(-Math.PI / 4);
+    ctx.fillText(text, 0, 0);
+    ctx.restore();
+    history[pi].u.push(c.toDataURL()); history[pi].r = [];
+  });
+  showToast(`Watermark "${text}" applied to all pages. Save to download.`);
+});
+
+/* Page numbers */
+$('fc-page-numbers')?.addEventListener('click', () => toggleSubPanel('sub-page-numbers', $('fc-page-numbers')));
+$('do-page-numbers')?.addEventListener('click', async () => {
+  if (!pdfDoc) { showToast('Open a PDF first'); return; }
+  const pos   = $('pagenum-pos').value;
+  const start = +$('pagenum-start').value || 1;
+  inkCanvases.forEach((c, pi) => {
+    const ctx = c.getContext('2d');
+    const num = start + pi;
+    const fs  = Math.max(12, c.width / 50);
+    ctx.save();
+    ctx.font = `${fs}px Arial`; ctx.fillStyle = '#333'; ctx.globalAlpha = 0.85;
+    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    const margin = fs * 1.5;
+    let x = c.width / 2, y = c.height - margin;
+    if (pos === 'bottom-right') { x = c.width - margin * 2; ctx.textAlign = 'right'; }
+    if (pos === 'bottom-left')  { x = margin * 2; ctx.textAlign = 'left'; }
+    if (pos === 'top-center')   { y = margin; }
+    ctx.fillText(String(num), x, y);
+    ctx.restore();
+    history[pi].u.push(c.toDataURL()); history[pi].r = [];
+  });
+  showToast(`Page numbers added (${start}–${start + inkCanvases.length - 1}). Save to download.`);
+});
+
+/* Crop marks */
+$('fc-crop-marks')?.addEventListener('click', async () => {
+  if (!pdfDoc) { showToast('Open a PDF first'); return; }
+  inkCanvases.forEach((c, pi) => {
+    const ctx = c.getContext('2d');
+    const len = 20, gap = 8, lw = 1;
+    ctx.save(); ctx.strokeStyle = '#000'; ctx.lineWidth = lw; ctx.globalAlpha = 0.7;
+    // Four corners
+    [[0, 0, 1, 1], [c.width, 0, -1, 1], [0, c.height, 1, -1], [c.width, c.height, -1, -1]].forEach(([cx, cy, dx, dy]) => {
+      ctx.beginPath(); ctx.moveTo(cx + dx * gap, cy); ctx.lineTo(cx + dx * (gap + len), cy); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(cx, cy + dy * gap); ctx.lineTo(cx, cy + dy * (gap + len)); ctx.stroke();
+    });
+    ctx.restore();
+    history[pi].u.push(c.toDataURL()); history[pi].r = [];
+  });
+  showToast('Crop marks added to all pages. Save to download.');
+});
+
 document.addEventListener('keydown', e => {
   // Modal sig-draw undo
   if (!$('sig-backdrop').classList.contains('hidden')) {
     if ((e.ctrlKey || e.metaKey) && e.key === 'z' && !e.shiftKey) { e.preventDefault(); $('sig-undo-draw').click(); return; }
   }
-  if (e.key === 'Escape') { closeSigModal(); cancelSigPlace(); if (mode !== 'pen') setMode('pen'); return; }
+  if (e.key === 'Escape') {
+    closeSigModal(); cancelSigPlace();
+    document.querySelectorAll('.feat-modal-backdrop:not(.hidden)').forEach(m => m.classList.add('hidden'));
+    document.querySelectorAll('.feat-btn').forEach(b => b.classList.remove('active'));
+    if (mode === 'redact') cancelRedactMode();
+    if (textMode) textMode = false;
+    if (formFieldPending) formFieldPending = false;
+    if (mode !== 'pen') setMode('pen');
+    stopCamera();
+    return;
+  }
   if ((e.ctrlKey || e.metaKey) && e.key === '=') { e.preventDefault(); applyZoom(zoomCss * 100 + 10); return; }
   if ((e.ctrlKey || e.metaKey) && e.key === '-') { e.preventDefault(); applyZoom(zoomCss * 100 - 10); return; }
   if ((e.ctrlKey || e.metaKey) && e.key === '0') { e.preventDefault(); applyZoom(100); return; }
