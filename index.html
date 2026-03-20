@@ -33,7 +33,6 @@
 
     /* ── SIDEBAR ─────────────────────────────────────────────── */
     .sidebar { width: 52px; min-width: 52px; background: var(--bg-base); border-right: 1px solid var(--border); display: flex; flex-direction: column; align-items: center; padding: 6px 0; gap: 2px; z-index: 20; overflow: visible; }
-      .sidebar { width: 52px; min-width: 52px; background: var(--bg-base); border-right: 1px solid var(--border); display: flex; flex-direction: column; align-items: center; padding: 6px 0; gap: 2px; z-index: 20; overflow: visible; }
     .sidebar-sep { width: 32px; height: 1px; background: var(--border); margin: 4px 0; }
     .nav-btn { position: relative; width: 36px; height: 36px; border: none; border-radius: var(--radius); background: transparent; color: var(--text-muted); cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 16px; transition: background .15s, color .15s; }
     .nav-btn:hover { background: var(--bg-hover); color: var(--text); }
@@ -89,7 +88,7 @@
     #size-picker::-webkit-slider-thumb { -webkit-appearance: none; width: 14px; height: 14px; border-radius: 50%; background: var(--accent); cursor: pointer; }
 
     /* ── VIEWER ──────────────────────────────────────────────── */
-    .viewer { flex: 1; overflow: auto; background: var(--bg-deep); scrollbar-width: thin; scrollbar-color: var(--border) transparent; }
+    .viewer { flex: 1; overflow: auto; background: var(--bg-deep); scrollbar-width: thin; scrollbar-color: var(--border) transparent; min-height: 0; }
     .viewer::-webkit-scrollbar { width: 8px; }
     .viewer::-webkit-scrollbar-thumb { background: var(--border); border-radius: 99px; }
     #pages-wrapper { display: flex; flex-direction: column; align-items: center; padding: 20px; gap: 20px; min-height: 100%; transform-origin: top center; }
@@ -386,55 +385,75 @@
       .page-mgr-grid { grid-template-columns: repeat(auto-fill, minmax(80px, 1fr)); }
     }
 
+    /* ── Mobile toolbar toggle button ── */
+    #mobile-toolbar-toggle {
+      display: none;
+      height: 30px; padding: 0 10px;
+      border: 1px solid var(--border); border-radius: var(--radius);
+      background: var(--bg-raised); color: var(--text-muted); cursor: pointer;
+      align-items: center; gap: 5px;
+      font-family: var(--font); font-size: 12px; white-space: nowrap;
+      transition: background .12s, color .12s;
+    }
+    #mobile-toolbar-toggle:hover { background: var(--bg-hover); color: var(--text); }
+
     @media (max-width: 700px) {
       .sidepanel { display: none !important; }
       .topbar-title { display: none; }
       #search-input { width: 80px; }
       .nav-sep { display: none; }
+
+      /* Sidebar becomes a slim bottom tab bar */
       .sidebar {
-        width: 100vw;
-        min-width: 0;
-        flex-direction: row;
-        align-items: stretch;
+        width: 100vw; min-width: 0;
+        flex-direction: row; align-items: center;
         justify-content: space-around;
-        padding: 0;
-        position: fixed;
-        bottom: 0;
-        left: 0;
-        right: 0;
-        height: 52px;
-        border-right: none;
-        border-top: 1px solid var(--border);
+        padding: 0; gap: 0;
+        position: fixed; bottom: 0; left: 0; right: 0;
+        height: 48px;
+        border-right: none; border-top: 1px solid var(--border);
         z-index: 100;
       }
-      .nav-btn {
-        width: 36px;
-        height: 36px;
-        font-size: 18px;
-        margin: auto;
-      }
-      .sidebar-sep {
-        display: none;
-      }
-      body {
-        flex-direction: column;
-        height: 100vh;
-        overflow: visible;
-      }
-      .main {
-        margin-bottom: 52px;
-        flex: 1 1 auto;
-        overflow-y: auto;
-        -webkit-overflow-scrolling: touch;
-        height: auto;
-        min-height: 0;
-      }
+      .nav-btn { width: 40px; height: 40px; font-size: 18px; margin: 0; }
+      .sidebar-sep { display: none; }
+      /* Suppress the tooltips on touch */
+      .nav-btn::after { display: none; }
+
+      /* Full-page layout */
+      body { flex-direction: column; height: 100dvh; overflow: hidden; }
+
+      .main { margin-bottom: 48px; flex: 1 1 auto; display: flex; flex-direction: column; overflow: hidden; min-height: 0; }
+
+      /* Compact topbar — hide lower-priority items */
+      .topbar { padding: 3px 8px; gap: 3px; min-height: 38px; flex-wrap: nowrap; overflow-x: auto; }
+      .topbar .top-divider:first-of-type { display: none; }
+      .topbar-spacer { min-width: 4px; flex: 1; }
+
+      /* Page nav bar — horizontal scroll on overflow */
+      .page-nav-bar { padding: 3px 8px; min-height: 36px; flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; }
+      .page-nav-bar::-webkit-scrollbar { display: none; }
+      .search-wrap { margin-left: 8px; flex-shrink: 0; }
+
+      /* Drawing toolbar — hidden by default on mobile, toggled */
+      .toolbar { display: none; padding: 4px 8px; min-height: 38px; }
+      .toolbar.mobile-open { display: flex; }
+
+      /* Feature bar — hidden by default, toggled together with toolbar */
+      .feature-bar { display: none; }
+      .feature-bar.mobile-open { display: flex; }
+
+      /* Mobile toggle button visible on mobile */
+      #mobile-toolbar-toggle { display: flex; }
+
+      /* Viewer takes all remaining space and scrolls */
       .viewer {
-        overflow-y: auto !important;
+        flex: 1 1 0; overflow: auto !important;
         -webkit-overflow-scrolling: touch;
-        height: auto;
         min-height: 0;
       }
+
+      /* Statusbar hidden on mobile to save space */
+      .statusbar { display: none; }
     }
   </style>
 </head>
@@ -464,6 +483,7 @@
     <button class="tb-btn" id="export-btn">⬇️ Export</button>
     <div class="topbar-spacer"></div>
     <div class="top-divider"></div>
+    <button id="mobile-toolbar-toggle" title="Toggle drawing tools">🎨 Tools</button>
     <button class="tb-btn icon-only" id="dark-mode-btn" title="Toggle dark/light">🌙</button>
     <button class="tb-btn icon-only" id="settings-btn"  title="Settings">⚙️</button>
   </div>
@@ -500,7 +520,8 @@
   <!-- Row 3 -->
   <div class="toolbar" role="toolbar" aria-label="Annotation tools">
     <span class="tool-label">Draw</span>
-    <button class="tb-btn active" id="pen-btn"       aria-pressed="true"  aria-label="Pen">✏️ Pen</button>
+    <button class="tb-btn"        id="scroll-btn"    aria-pressed="false" aria-label="Scroll/Select" title="Scroll mode (S)">🖱 Scroll</button>
+    <button class="tb-btn"        id="pen-btn"       aria-pressed="false" aria-label="Pen">✏️ Pen</button>
     <button class="tb-btn"        id="highlight-btn" aria-pressed="false" aria-label="Highlight">🖍 Highlight</button>
     <button class="tb-btn"        id="eraser-btn"    aria-pressed="false" aria-label="Erase">🧽 Erase</button>
     <div class="nav-sep"></div>
@@ -1316,9 +1337,11 @@ setActiveNav(0);
 
 /* ── Tool mode ── */
 const toolDefs = [
-  { id: 'pen-btn', m: 'pen' }, { id: 'highlight-btn', m: 'highlight' },
-  { id: 'eraser-btn', m: 'eraser' }, { id: 'sign-btn', m: 'sign' },
+  { id: 'scroll-btn', m: 'scroll' }, { id: 'pen-btn', m: 'pen' },
+  { id: 'highlight-btn', m: 'highlight' }, { id: 'eraser-btn', m: 'eraser' },
+  { id: 'sign-btn', m: 'sign' },
 ];
+const DRAW_MODES = ['pen', 'highlight', 'eraser'];
 function setMode(m) {
   if (m !== 'sigPlace') cancelSigPlace();
   mode = m;
@@ -1327,9 +1350,13 @@ function setMode(m) {
     b.classList.toggle('active', bm === m);
     b.setAttribute('aria-pressed', bm === m ? 'true' : 'false');
   });
+  // Ink layers should only receive pointer events in draw modes
+  const drawActive = DRAW_MODES.includes(m);
+  inkCanvases.forEach(c => { c.style.pointerEvents = drawActive ? 'auto' : 'none'; });
+  document.body.style.cursor = drawActive ? 'crosshair' : '';
 }
 toolDefs.forEach(({ id, m }) => $(id)?.addEventListener('click', () => m === 'sign' ? openSigModal() : setMode(m)));
-setMode('pen');
+setMode('scroll');
 
 /* ── Dark mode ── */
 let lightMode = false;
@@ -1337,6 +1364,15 @@ $('dark-mode-btn').addEventListener('click', () => {
   lightMode = !lightMode;
   document.body.classList.toggle('light-mode', lightMode);
   $('dark-mode-btn').textContent = lightMode ? '🌞' : '🌙';
+});
+
+/* ── Mobile toolbar toggle ── */
+let mobileToolsOpen = false;
+$('mobile-toolbar-toggle')?.addEventListener('click', () => {
+  mobileToolsOpen = !mobileToolsOpen;
+  document.querySelector('.toolbar')?.classList.toggle('mobile-open', mobileToolsOpen);
+  document.querySelector('.feature-bar')?.classList.toggle('mobile-open', mobileToolsOpen);
+  $('mobile-toolbar-toggle').textContent = mobileToolsOpen ? '✕ Close' : '🎨 Tools';
 });
 
 /* ══ FILE OPEN ══════════════════════════════════════════════════════════════ */
@@ -1377,6 +1413,7 @@ async function renderAll(snapshots = null) {
 
     const inkC = document.createElement('canvas');
     inkC.className = 'ink-layer'; inkC.width = vp.width; inkC.height = vp.height;
+    inkC.style.pointerEvents = DRAW_MODES.includes(mode) ? 'auto' : 'none';
 
     wrap.appendChild(pdfC); wrap.appendChild(inkC);
     $('pages-wrapper').appendChild(wrap);
@@ -1652,7 +1689,18 @@ function sigDrawStart(e) {
   sigDrawRedo = [];
   const p = sdPos(e);
   sigPoints.push(p);
-  sigCtx.beginPath(); sigCtx.moveTo(p.x, p.y);
+  const baseSize = +$('sig-pen-size').value;
+  sigCtx.lineWidth = baseSize * 1.5;
+  sigCtx.strokeStyle = $('sig-ink-draw').value;
+  sigCtx.lineCap = sigCtx.lineJoin = 'round';
+  sigCtx.beginPath();
+  sigCtx.moveTo(p.x, p.y);
+  // Draw a dot for single-tap
+  sigCtx.arc(p.x, p.y, baseSize * 0.75, 0, Math.PI * 2);
+  sigCtx.fillStyle = $('sig-ink-draw').value;
+  sigCtx.fill();
+  sigCtx.beginPath();
+  sigCtx.moveTo(p.x, p.y);
 }
 
 function sigDrawMove(e) {
@@ -1660,20 +1708,14 @@ function sigDrawMove(e) {
   const p = sdPos(e);
   sigPoints.push(p);
 
-  // Speed-based pressure: faster = thinner, slower = thicker
-  const dt   = Math.max(1, p.t - (sigPoints[sigPoints.length - 2]?.t ?? p.t));
-  const dx   = p.x - (sigPoints[sigPoints.length - 2]?.x ?? p.x);
-  const dy   = p.y - (sigPoints[sigPoints.length - 2]?.y ?? p.y);
-  const speed = Math.sqrt(dx * dx + dy * dy) / dt;
   const baseSize = +$('sig-pen-size').value;
-  const width = Math.max(0.5, baseSize * (1 - Math.min(speed * 0.5, 0.65)));
 
   sigCtx.strokeStyle = $('sig-ink-draw').value;
-  sigCtx.lineWidth   = width;
+  sigCtx.lineWidth   = baseSize * 1.5;
   sigCtx.globalAlpha = 1;
   sigCtx.globalCompositeOperation = 'source-over';
 
-  // Bezier smoothing through midpoints
+  // Smooth bezier through midpoints — keep path open to avoid gaps
   if (sigPoints.length >= 3) {
     const len  = sigPoints.length;
     const prev = sigPoints[len - 2];
@@ -1684,8 +1726,16 @@ function sigDrawMove(e) {
     sigCtx.lineTo(p.x, p.y);
   }
   sigCtx.stroke();
+  // Don't beginPath here — keep the path open so strokes connect cleanly
   sigCtx.beginPath();
-  sigCtx.moveTo(p.x, p.y);
+  sigCtx.moveTo(
+    sigPoints.length >= 3
+      ? (sigPoints[sigPoints.length-2].x + p.x) / 2
+      : p.x,
+    sigPoints.length >= 3
+      ? (sigPoints[sigPoints.length-2].y + p.y) / 2
+      : p.y
+  );
 
   drawHasInk = true;
   $('sig-guide').classList.add('gone');
@@ -3020,7 +3070,7 @@ document.addEventListener('keydown', e => {
     if (mode === 'redact') cancelRedactMode();
     if (textMode) textMode = false;
     if (formFieldPending) formFieldPending = false;
-    if (mode !== 'pen') setMode('pen');
+    if (!['scroll','pen','highlight','eraser'].includes(mode)) setMode('scroll');
     stopCamera();
     return;
   }
@@ -3028,6 +3078,7 @@ document.addEventListener('keydown', e => {
   if ((e.ctrlKey || e.metaKey) && e.key === '-') { e.preventDefault(); applyZoom(zoomCss * 100 - 10); return; }
   if ((e.ctrlKey || e.metaKey) && e.key === '0') { e.preventDefault(); applyZoom(100); return; }
   if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+  if (e.key === 's') setMode('scroll');
   if (e.key === 'p') setMode('pen');
   if (e.key === 'h') setMode('highlight');
   if (e.key === 'e') setMode('eraser');
